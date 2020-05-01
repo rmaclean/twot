@@ -22,6 +22,7 @@ namespace twot
 
             var targetOption = new Option<string>("--target", "Person to block");
             targetOption.AddAlias("-t");
+            targetOption.Name = "targetUsername"; 
             targetOption.Required = true;
             cmd.Add(targetOption);
 
@@ -33,8 +34,10 @@ namespace twot
         {
             Console.WriteLine("Block Train 🚂");
             if (dryRun) {
-                Console.WriteLine("\t ⚠ Dry run mode");
+                Console.WriteLine("  ⚠ Dry run mode");
             }
+
+            Console.WriteLine($"Blocking @{targetUsername} and everyone who follows them.");
 
             var me = User.GetUserFromScreenName(username);
             var friends = await me.GetFriendsAsync(Int32.MaxValue);

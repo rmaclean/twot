@@ -1,9 +1,6 @@
 ﻿using System;
 using System.CommandLine;
-using System.Linq;
-using System.Threading.Tasks;
 using Tweetinvi;
-using Tweetinvi.Models;
 
 namespace twot
 {
@@ -11,8 +8,15 @@ namespace twot
     {
         static ICommand[] commands = { new CleanCommand(), new BlockTrain() };
 
-        static int Main(string[] args) 
+        static void EnableUTFConsole()
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.Write("\xfeff"); // bom = byte order mark
+        }
+
+        static int Main(string[] args)
+        {
+            EnableUTFConsole();
             var config = Config.Load();
             RateLimit.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
 
@@ -24,6 +28,7 @@ namespace twot
                 command.AddCommand(rootCommand);
             }
 
+            Console.WriteLine();
             return rootCommand.InvokeAsync(args).Result;
         }
     }

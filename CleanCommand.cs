@@ -5,7 +5,6 @@ using Tweetinvi.Models;
 using Tweetinvi;
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.CommandLine.Parsing;
 
 namespace twot
 {
@@ -22,7 +21,12 @@ namespace twot
             var dryRunOption = new Option<bool>("--dryrun", "Does not actually make the changes");
             cmd.Add(dryRunOption);
 
-            var minScoreOption = new Option<double>("--score", "Sets the score for min kicking. Defaults to 0.85");
+            var minScoreOption = new Option<double>(
+                "--score", 
+                () => 0.85, 
+                "Sets the score for min kicking. Defaults to 0.85"
+            );
+            minScoreOption.Name = "minscore";
             minScoreOption.AddAlias("-s");
             cmd.Add(minScoreOption);
 
@@ -34,13 +38,10 @@ namespace twot
         {
             Console.WriteLine("Running cleanup 🧹");
             if (dryRun) {
-                Console.WriteLine("\t ⚠ Dry run mode");
+                Console.WriteLine("  ⚠ Dry run mode");
             }
 
-            if (minScore == 0) {
-                minScore = 0.85;
-            }
-
+            Console.WriteLine($"Cleaning the followers of @{username}.");
             Console.WriteLine($"Min score: {minScore}");
 
             var me = User.GetUserFromScreenName(username);
@@ -138,7 +139,7 @@ namespace twot
             {
                 result += 0.3;
             }
-
+            
             return result;
         }
     }
