@@ -9,7 +9,7 @@ namespace twot
 {
     class BlockTrain : ICommand
     {
-         public void AddCommand(Command rootCommand)
+        public void AddCommand(Command rootCommand)
         {
             var cmd = new Command("BlockTrain", "Blocks someone, and everyone which follows them.");
 
@@ -18,7 +18,7 @@ namespace twot
 
             var targetOption = new Option<string>("--target", "Person to block");
             targetOption.AddAlias("-t");
-            targetOption.Name = "targetUsername"; 
+            targetOption.Name = "targetUsername";
             targetOption.Required = true;
             cmd.Add(targetOption);
 
@@ -29,7 +29,8 @@ namespace twot
         private async Task Execute(bool dryRun, string targetUsername)
         {
             Console.WriteLine("Block Train 🚂");
-            if (dryRun) {
+            if (dryRun)
+            {
                 Console.WriteLine("  ⚠ Dry run mode");
             }
 

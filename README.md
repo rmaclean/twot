@@ -1,9 +1,10 @@
 # Twot: Making Twitter Better
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/adaa49683a7e49cd8c243e641e6f8a66)](https://www.codacy.com/manual/rmaclean/twot?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=rmaclean/twot&amp;utm_campaign=Badge_Grade)
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/adaa49683a7e49cd8c243e641e6f8a66)](https://www.codacy.com/manual/rmaclean/twot?utm_source=github.com&utm_medium=referral&utm_content=rmaclean/twot&utm_campaign=Badge_Grade)
 
 Is a simple CLI app tool to help with managing your Twitter experience by giving some advanced tools.
 
-*Note:* This is really beta at this stage. Log an [incident](https://github.com/rmaclean/twot/issues) if you find issues.
+_Note:_ This is really beta at this stage. Log an [incident](https://github.com/rmaclean/twot/issues) if you find issues.
 
 ## Requirement
 
@@ -31,10 +32,11 @@ Creating a secrets.json file is the easist. Just place the following in, replaci
 Follow [this guide](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-3.1&tabs=windows#enable-secret-storage) to enable the user secret storage.
 
 Run the following commands setting the various keys:
-- `dotnet user-secrets set "twot:apikey" "???"`
-- `dotnet user-secrets set "twot:apisecret" "???"`
-- `dotnet user-secrets set "twot:accesstoken" "???"`
-- `dotnet user-secrets set "twot:accesssecret" "???"`
+
+- `dotnet user-secrets set "twot:apikey" "???"`  
+- `dotnet user-secrets set "twot:apisecret" "???"`  
+- `dotnet user-secrets set "twot:accesstoken" "???"`  
+- `dotnet user-secrets set "twot:accesssecret" "???"`  
 
 ## Using
 
@@ -52,14 +54,16 @@ Running this command will tell you if you are correctly setup. This is useful to
 
 This will allow you to block a user, and all their followers. In addtion to the common parameters, you just need to specify the targets username without the @, using `--target` or `-t`.
 
-#### People you follow
+#### BlockTrain and people you follow
+
 People who you follow will not be blocked in the block train.
 
 ### Clean
 
-This will allow you to "force unfollow", block and unblock a person which causes them to unfollow you, your followers based on a score. The goal is to get rid of bots and abandoned accounts. You do not need to provide anything beyond the common parameters, however there is a score parameter, `--score`, to change how aggressive you want to be. 
+This will allow you to "force unfollow", block and unblock a person which causes them to unfollow you, your followers based on a score. The goal is to get rid of bots and abandoned accounts. You do not need to provide anything beyond the common parameters, however there is a score parameter, `--score`, to change how aggressive you want to be.
 
-#### People you follow
+#### Clean and people you follow
+
 People who you follow will not get unfollowed.
 
 #### Scoring Rules

@@ -17,8 +17,8 @@ namespace twot
             cmd.Add(dryRunOption);
 
             var minScoreOption = new Option<double>(
-                "--score", 
-                () => 0.85, 
+                "--score",
+                () => 0.85,
                 "Sets the score for min kicking. Defaults to 0.85"
             );
             minScoreOption.Name = "minscore";
@@ -32,7 +32,8 @@ namespace twot
         private async Task Execute(bool dryRun, double minScore)
         {
             Console.WriteLine("Running cleanup 🧹");
-            if (dryRun) {
+            if (dryRun)
+            {
                 Console.WriteLine("  ⚠ Dry run mode");
             }
 
@@ -133,7 +134,7 @@ namespace twot
             {
                 result += 0.3;
             }
-            
+
             return result;
         }
     }

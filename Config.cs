@@ -11,7 +11,7 @@ namespace twot
         public string AccessToken { get; private set; } = "";
         public string AccessSecret { get; private set; } = "";
 
-        private Config(){}
+        private Config() { }
 
         public static (Boolean Success, Config Config) Load()
         {
@@ -21,34 +21,39 @@ namespace twot
                                 .Build();
 
             var section = configuration.GetSection("twot");
-            var result = new Config() {
+            var result = new Config
+            {
                 AccessSecret = section.GetValue<string>("accesssecret"),
                 APISecret = section.GetValue<string>("apisecret"),
                 AccessToken = section.GetValue<string>("accesstoken"),
                 APIKey = section.GetValue<string>("apikey")
-            };          
+            };
 
-            if (string.IsNullOrWhiteSpace(result.AccessSecret)) {
+            if (string.IsNullOrWhiteSpace(result.AccessSecret))
+            {
                 Console.WriteLine("Access Secret not set");
                 return (false, new Config());
             }
 
-            if (string.IsNullOrWhiteSpace(result.APISecret)) {
+            if (string.IsNullOrWhiteSpace(result.APISecret))
+            {
                 Console.WriteLine("API Secret not set");
                 return (false, new Config());
             }
 
-            if (string.IsNullOrWhiteSpace(result.AccessToken)) {
+            if (string.IsNullOrWhiteSpace(result.AccessToken))
+            {
                 Console.WriteLine("Access Token not set");
                 return (false, new Config());
             }
 
-            if (string.IsNullOrWhiteSpace(result.APIKey)) {
+            if (string.IsNullOrWhiteSpace(result.APIKey))
+            {
                 Console.WriteLine("API Key not set");
                 return (false, new Config());
-            }                        
+            }
 
-            return (true, result);  
+            return (true, result);
         }
 
         public override string ToString()
