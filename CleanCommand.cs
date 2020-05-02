@@ -13,11 +13,6 @@ namespace twot
         public void AddCommand(Command rootCommand)
         {
             var cmd = new Command("Clean", "Scores everyone who follows the supplied user and if they do not meet a min-score they get blocked and unblocked which forces them to unfollow you.");
-            var usernameOption = new Option<string>("--username", "Your username");
-            usernameOption.AddAlias("-u");
-            usernameOption.Required = true;
-            cmd.Add(usernameOption);
-
             var dryRunOption = new Option<bool>("--dryrun", "Does not actually make the changes");
             cmd.Add(dryRunOption);
 
@@ -30,21 +25,20 @@ namespace twot
             minScoreOption.AddAlias("-s");
             cmd.Add(minScoreOption);
 
-            cmd.Handler = CommandHandler.Create<string, bool, double>(Execute);
+            cmd.Handler = CommandHandler.Create<bool, double>(Execute);
             rootCommand.Add(cmd);
         }
 
-        private async Task Execute(string username, bool dryRun, double minScore)
+        private async Task Execute(bool dryRun, double minScore)
         {
             Console.WriteLine("Running cleanup 🧹");
             if (dryRun) {
                 Console.WriteLine("  ⚠ Dry run mode");
             }
 
-            Console.WriteLine($"Cleaning the followers of @{username}.");
+            var me = User.GetAuthenticatedUser();
+            Console.WriteLine($"Cleaning the followers of @{me.ScreenName}.");
             Console.WriteLine($"Min score: {minScore}");
-
-            var me = User.GetUserFromScreenName(username);
 
             var friends = await me.GetFriendIdsAsync(Int32.MaxValue);
             var followers = await me.GetFollowersAsync(Int32.MaxValue);

@@ -12,10 +12,6 @@ namespace twot
          public void AddCommand(Command rootCommand)
         {
             var cmd = new Command("BlockTrain", "Blocks someone, and everyone which follows them.");
-            var usernameOption = new Option<string>("--username", "Your username");
-            usernameOption.AddAlias("-u");
-            usernameOption.Required = true;
-            cmd.Add(usernameOption);
 
             var dryRunOption = new Option<bool>("--dryrun", "Does not actually make the changes");
             cmd.Add(dryRunOption);
@@ -26,11 +22,11 @@ namespace twot
             targetOption.Required = true;
             cmd.Add(targetOption);
 
-            cmd.Handler = CommandHandler.Create<string, bool, string>(Execute);
+            cmd.Handler = CommandHandler.Create<bool, string>(Execute);
             rootCommand.Add(cmd);
         }
 
-        private async Task Execute(string username, bool dryRun, string targetUsername)
+        private async Task Execute(bool dryRun, string targetUsername)
         {
             Console.WriteLine("Block Train 🚂");
             if (dryRun) {
@@ -39,7 +35,7 @@ namespace twot
 
             Console.WriteLine($"Blocking @{targetUsername} and everyone who follows them.");
 
-            var me = User.GetUserFromScreenName(username);
+            var me = User.GetAuthenticatedUser();
             var friends = await me.GetFriendsAsync(Int32.MaxValue);
 
             var target = User.GetUserFromScreenName(targetUsername);

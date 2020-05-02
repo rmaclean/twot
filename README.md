@@ -1,4 +1,5 @@
-# Twot
+# Twot: Making Twitter Better
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/adaa49683a7e49cd8c243e641e6f8a66)](https://www.codacy.com/manual/rmaclean/twot?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=rmaclean/twot&amp;utm_campaign=Badge_Grade)
 
 Is a simple CLI app tool to help with managing your Twitter experience by giving some advanced tools.
 
@@ -10,6 +11,25 @@ You will need to register a [Twitter App](https://developer.twitter.com/en/apps)
 
 ### Set API Keys
 
+The API keys can be stored using the .NET user secret store or in a secrets.json file.
+
+#### secrets.json
+
+Creating a secrets.json file is the easist. Just place the following in, replacing the ??? with your keys you got above.
+
+```
+{
+    "twot:apikey": "???",
+    "twot:apisecret": "???",
+    "twot:accesstoken": "???",
+    "twot:accesssecret": "???"
+}
+```
+
+#### Using User Secrets
+
+Follow [this guide](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-3.1&tabs=windows#enable-secret-storage) to enable the user secret storage.
+
 Run the following commands setting the various keys:
 - `dotnet user-secrets set "twot:apikey" "???"`
 - `dotnet user-secrets set "twot:apisecret" "???"`
@@ -18,11 +38,15 @@ Run the following commands setting the various keys:
 
 ## Using
 
-Execute twot followed by a command, currently there are two BlockTrain and Clean (they are case sensitive).
+Execute Twot followed by a command, currently there are three: Ready, BlockTrain and Clean (they are case sensitive).
 
 ### Common parameters
 
-Both commands accept a username, this should be yours which can be provided with `--username` or `-u` followed by your username (without the @ sign). The other command is dry run, which is specified with `--dryrun` which will let you see the changes without making them.
+Both BlockTrain and Clean accept a dry run parameter, which is specified with `--dryrun` which will let you see the changes without actually making them.
+
+### Ready
+
+Running this command will tell you if you are correctly setup. This is useful to verify the API secrets.
 
 ### BlockTrain
 

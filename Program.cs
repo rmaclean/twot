@@ -6,7 +6,7 @@ namespace twot
 {
     class Program
     {
-        static ICommand[] commands = { new CleanCommand(), new BlockTrain() };
+        static ICommand[] commands = { new CleanCommand(), new BlockTrain(), new ReadyCommand() };
 
         static void EnableUTFConsole()
         {
@@ -17,12 +17,18 @@ namespace twot
         static int Main(string[] args)
         {
             EnableUTFConsole();
-            var config = Config.Load();
+            var configResult = Config.Load();
+            if (!configResult.Success)
+            {
+                return -1;
+            }
+
+            var config = configResult.Config;
             RateLimit.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
 
             Auth.SetUserCredentials(config.APIKey, config.APISecret, config.AccessToken, config.AccessSecret);
 
-            var rootCommand = new RootCommand("Twot - it makes living with twitter better");
+            var rootCommand = new RootCommand("Twot: Making Twitter Better");
             foreach (var command in commands)
             {
                 command.AddCommand(rootCommand);
