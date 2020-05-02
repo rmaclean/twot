@@ -1,6 +1,6 @@
 # Twot: Making Twitter Better
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/adaa49683a7e49cd8c243e641e6f8a66)](https://www.codacy.com/manual/rmaclean/twot?utm_source=github.com&utm_medium=referral&utm_content=rmaclean/twot&utm_campaign=Badge_Grade)
+[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/adaa49683a7e49cd8c243e641e6f8a66)](https://www.codacy.com/manual/rmaclean/twot?utm_source=github.com&utm_medium=referral&utm_content=rmaclean/twot&utm_campaign=Badge_Grade)
 
 Is a simple CLI app tool to help with managing your Twitter experience by giving some advanced tools.
 

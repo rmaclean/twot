@@ -44,9 +44,11 @@ namespace twot
             var friends = await me.GetFriendIdsAsync(Int32.MaxValue);
             var followers = await me.GetFollowersAsync(Int32.MaxValue);
 
+            var scoringConfig = new ScoreConfig();
+
             var botsOrDead = followers
                 .Where(_ => !friends.Contains(_.Id))
-                .Select(Follower => (Follower, Score: Score(Follower)))
+                .Select(Follower => (Follower, Score: Score(Follower, scoringConfig)))
                 .Where(_ => _.Score > minScore)
                 .OrderBy(_ => _.Follower.Name);
 
@@ -64,75 +66,75 @@ namespace twot
             Console.WriteLine(botsOrDead.Count());
         }
 
-        double Score(IUser follower)
+        double Score(IUser follower, ScoreConfig scoring)
         {
             var result = 0.0;
-            if (follower.DefaultProfileImage)
+            if (scoring.DefaultProfileImage.Enabled && follower.DefaultProfileImage == scoring.DefaultProfileImage.Value)
             {
-                result += 1;
+                result += scoring.DefaultProfileImage.Impact;
             }
 
-            if (follower.Description.Length == 0)
+            if (scoring.DescriptionLength.Enabled && follower.Description.Length <= scoring.DescriptionLength.Value)
             {
-                result += 0.3;
+                result += scoring.DescriptionLength.Impact;
             }
 
-            if (follower.FavouritesCount == 0)
+            if (scoring.Favourites.Enabled && follower.FavouritesCount <= scoring.Favourites.Value)
             {
-                result += 0.8;
+                result += scoring.Favourites.Impact;
             }
 
-            if (follower.FriendsCount < 20)
+            if (scoring.FriendsLessThan.Enabled && follower.FriendsCount <= scoring.FriendsLessThan.Value)
             {
-                result += 0.5;
+                result += scoring.FriendsLessThan.Impact;
             }
 
-            if (follower.Location.Length == 0)
+            if (scoring.LocationLength.Enabled && follower.Location.Length <= scoring.LocationLength.Value)
             {
-                result += 0.2;
+                result += scoring.LocationLength.Impact;
             }
 
-            if (follower.FollowersCount > 10000)
+            if (scoring.FollowersLarge.Enabled && follower.FollowersCount >= scoring.FollowersLarge.Value)
             {
-                result += 0.2;
-
-                if (follower.FollowersCount > 25000)
-                {
-                    result += 0.7;
-                }
+                result += scoring.FollowersLarge.Impact;
             }
 
-            if (follower.StatusesCount < 10)
+            if (scoring.FollowersExtraLarge.Enabled && follower.FollowersCount >= scoring.FollowersExtraLarge.Value)
             {
-                result += 0.3;
+                result += scoring.FollowersExtraLarge.Impact;
+            }
 
-                if (follower.StatusesCount == 0)
-                {
-                    result += 0.5;
-                }
+            if (scoring.TweetsLessThan.Enabled && follower.StatusesCount <= scoring.TweetsLessThan.Value)
+            {
+                result += scoring.TweetsLessThan.Impact;
+            }
+
+            if (scoring.ZeroTweets.Enabled && follower.StatusesCount == scoring.ZeroTweets.Value)
+            {
+                result += scoring.ZeroTweets.Impact;
             }
 
             if (follower.Status != null)
             {
-                if (follower.Status.CreatedAt > DateTime.Now.Subtract(TimeSpan.FromDays(7)))
+                if (scoring.TweetedInLastWeek.Enabled && follower.Status.CreatedAt > DateTime.Now.Subtract(TimeSpan.FromDays(7)))
                 {
-                    result -= 0.4;
+                    result -= scoring.TweetedInLastWeek.Impact;
                 }
 
-                if (follower.Status.CreatedAt < DateTime.Now.Subtract(TimeSpan.FromDays(90)))
+                if (scoring.TweetedMoreThan90Days.Enabled && follower.Status.CreatedAt < DateTime.Now.Subtract(TimeSpan.FromDays(90)))
                 {
-                    result += 0.5;
+                    result += scoring.TweetedMoreThan90Days.Impact;
                 }
 
-                if (follower.Status.CreatedAt < DateTime.Now.Subtract(TimeSpan.FromDays(365)))
+                if (scoring.TweetedMoreThan1Year.Enabled && follower.Status.CreatedAt < DateTime.Now.Subtract(TimeSpan.FromDays(365)))
                 {
-                    result += 1;
+                    result += scoring.TweetedMoreThan1Year.Impact;
                 }
             }
 
-            if (follower.FriendsCount > 5000)
+            if (scoring.FollowingMoreThan.Enabled && follower.FriendsCount >= scoring.FollowingMoreThan.Value)
             {
-                result += 0.3;
+                result += scoring.FollowingMoreThan.Impact;
             }
 
             return result;
