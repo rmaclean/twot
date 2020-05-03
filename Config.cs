@@ -1,14 +1,23 @@
 
 using System;
 using Microsoft.Extensions.Configuration;
+using System.Reflection;
+using System.Linq;
 
 namespace twot
 {
     class Config
     {
+        [ConfigInfo(DisplayName = "API Key", ConfigProperty = "apikey")]
         public string APIKey { get; private set; } = "";
+
+        [ConfigInfo(DisplayName = "API Secret", ConfigProperty = "apisecret")]
         public string APISecret { get; private set; } = "";
+
+        [ConfigInfo(DisplayName = "Access Token", ConfigProperty = "accesstoken")]
         public string AccessToken { get; private set; } = "";
+
+        [ConfigInfo(DisplayName = "Access Secret", ConfigProperty = "accesssecret")]
         public string AccessSecret { get; private set; } = "";
 
         private Config() { }
@@ -21,36 +30,23 @@ namespace twot
                                 .Build();
 
             var section = configuration.GetSection("twot");
-            var result = new Config
-            {
-                AccessSecret = section.GetValue<string>("accesssecret"),
-                APISecret = section.GetValue<string>("apisecret"),
-                AccessToken = section.GetValue<string>("accesstoken"),
-                APIKey = section.GetValue<string>("apikey")
-            };
+            var result = new Config();
 
-            if (string.IsNullOrWhiteSpace(result.AccessSecret))
-            {
-                Console.WriteLine("Access Secret not set");
-                return (false, new Config());
-            }
+            var propertiesToSet = result.GetType().GetProperties()
+                .Select(propertyInfo =>
+                    (PropertyInfo: propertyInfo, Config: propertyInfo.GetCustomAttribute<ConfigInfoAttribute>()))
+                .Where(property => property.Config != null);
 
-            if (string.IsNullOrWhiteSpace(result.APISecret))
+            foreach (var propInfo in propertiesToSet)
             {
-                Console.WriteLine("API Secret not set");
-                return (false, new Config());
-            }
+                var configValue = section.GetValue<string>(propInfo.Config.ConfigProperty);
+                if (string.IsNullOrWhiteSpace(configValue))
+                {
+                    Console.WriteLine($"{propInfo.Config.DisplayName} not set");
+                    return (false, new Config());
+                }
 
-            if (string.IsNullOrWhiteSpace(result.AccessToken))
-            {
-                Console.WriteLine("Access Token not set");
-                return (false, new Config());
-            }
-
-            if (string.IsNullOrWhiteSpace(result.APIKey))
-            {
-                Console.WriteLine("API Key not set");
-                return (false, new Config());
+                propInfo.PropertyInfo.SetValue(result, configValue);
             }
 
             return (true, result);
@@ -58,7 +54,18 @@ namespace twot
 
         public override string ToString()
         {
-            return $"APIKey: {APIKey}\nAPISecret: {APISecret}\nAccessToken: {AccessToken}\nAccessSecret: {AccessSecret}";
+            return string.Join(Environment.NewLine, this.GetType().GetProperties()
+                .Select(propertyInfo =>
+                    (PropertyInfo: propertyInfo, Config: propertyInfo.GetCustomAttribute<ConfigInfoAttribute>()))
+                .Where(property => property.Config != null)
+                .Select(property => $"{property.Config.DisplayName} = {property.PropertyInfo.GetValue(this)}"));
         }
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+    sealed class ConfigInfoAttribute : System.Attribute
+    {
+        public string DisplayName { get; set; } = "";
+        public string ConfigProperty { get; set; } = "";
     }
 }
