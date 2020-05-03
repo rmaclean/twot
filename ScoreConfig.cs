@@ -1,3 +1,9 @@
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using Newtonsoft.Json;
+using System.Linq;
+
 namespace twot
 {
     class ScoreConfig
@@ -15,6 +21,24 @@ namespace twot
         public Score<bool> TweetedMoreThan90Days { get; private set; } = new Score<bool>(true, 0.5);
         public Score<bool> TweetedMoreThan1Year { get; private set; } = new Score<bool>(true, 1);
         public Score<int> FollowingMoreThan { get; private set; } = new Score<int>(5000, 0.3);
+
+        public ScoreConfig()
+        {
+            if (File.Exists("score.json"))
+            {
+                var properties = this.GetType().GetProperties();
+                var overridesJson = File.ReadAllText("score.json");
+                var overrides = JsonConvert.DeserializeObject<Dictionary<string, Score<object>>>(overridesJson);
+                foreach (var (key, score) in overrides)
+                {
+                    var property = properties.FirstOrDefault(prop => prop.Name == key);
+                    if (property != null)
+                    {
+                        property.SetValue(score, this);
+                    }
+                }
+            }
+        }
     }
 
     class Score<T>
