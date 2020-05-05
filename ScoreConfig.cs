@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using Newtonsoft.Json;
 using System.Linq;
+using System;
 
 namespace twot
 {
@@ -34,7 +35,19 @@ namespace twot
                     var property = properties.FirstOrDefault(prop => prop.Name == key);
                     if (property != null)
                     {
-                        property.SetValue(score, this);
+                        switch (score.Value)
+                        {
+                            case bool b:
+                            {
+                                property.SetValue(this, new Score<bool>(b, score.Impact, score.Enabled));
+                                break;
+                            }
+                            case int i:
+                            {
+                                property.SetValue(this, new Score<int>(i, score.Impact, score.Enabled));
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -43,11 +56,11 @@ namespace twot
 
     class Score<T>
     {
-        public bool Enabled { get; private set; }
+        public bool Enabled { get; set; }
 
-        public T Value { get; private set; }
+        public T Value { get; set; }
 
-        public double Impact { get; private set; }
+        public double Impact { get; set; }
 
         public Score(T value, double impact, bool enabled = true)
         {
