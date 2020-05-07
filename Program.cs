@@ -1,12 +1,17 @@
-﻿using System;
-using System.CommandLine;
-using Tweetinvi;
-
-namespace twot
+﻿namespace twot
 {
+    using System;
+    using System.CommandLine;
+    using Tweetinvi;
+
     class Program
     {
-        static ICommand[] commands = { new CleanCommand(), new BlockTrain(), new ReadyCommand() };
+        static ICommand[] commands = {
+            new CleanCommand(),
+            new BlockTrain(),
+            new ReadyCommand(),
+            new InitCommand(),
+        };
 
         static void EnableUTFConsole()
         {

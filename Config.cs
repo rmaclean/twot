@@ -1,11 +1,10 @@
-
-using System;
-using Microsoft.Extensions.Configuration;
-using System.Reflection;
-using System.Linq;
-
 namespace twot
 {
+    using System;
+    using Microsoft.Extensions.Configuration;
+    using System.Reflection;
+    using System.Linq;
+
     class Config
     {
         [ConfigInfo(DisplayName = "API Key", ConfigProperty = "apikey")]
@@ -39,7 +38,7 @@ namespace twot
 
             foreach (var propInfo in propertiesToSet)
             {
-                var configValue = section.GetValue<string>(propInfo.Config.ConfigProperty);
+                var configValue = section.GetValue<string>(propInfo.Config!.ConfigProperty);
                 if (string.IsNullOrWhiteSpace(configValue))
                 {
                     Console.WriteLine($"{propInfo.Config.DisplayName} not set");
@@ -58,7 +57,7 @@ namespace twot
                 .Select(propertyInfo =>
                     (PropertyInfo: propertyInfo, Config: propertyInfo.GetCustomAttribute<ConfigInfoAttribute>()))
                 .Where(property => property.Config != null)
-                .Select(property => $"{property.Config.DisplayName} = {property.PropertyInfo.GetValue(this)}"));
+                .Select(property => $"{property.Config!.DisplayName} = {property.PropertyInfo.GetValue(this)}"));
         }
     }
 

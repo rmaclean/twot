@@ -1,5 +1,11 @@
 namespace twot
 {
+    using System.Collections.Generic;
+    using System.IO;
+    using Newtonsoft.Json;
+    using System.Linq;
+    using System;
+
     class ScoreConfig
     {
         public Score<bool> DefaultProfileImage { get; private set; } = new Score<bool>(true, 1);
@@ -15,15 +21,57 @@ namespace twot
         public Score<bool> TweetedMoreThan90Days { get; private set; } = new Score<bool>(true, 0.5);
         public Score<bool> TweetedMoreThan1Year { get; private set; } = new Score<bool>(true, 1);
         public Score<int> FollowingMoreThan { get; private set; } = new Score<int>(5000, 0.3);
+
+        public ScoreConfig()
+        {
+            if (File.Exists("score.json"))
+            {
+                var properties = this.GetType().GetProperties();
+                var overridesJson = File.ReadAllText("score.json");
+                var overrides = JsonConvert.DeserializeObject<Dictionary<string, Score<object>>>(overridesJson);
+                foreach (var (key, score) in overrides)
+                {
+                    var property = properties.FirstOrDefault(prop => prop.Name == key);
+                    if (property != null)
+                    {
+                        switch (score.Value)
+                        {
+                            case bool b:
+                                {
+                                    property.SetValue(this, new Score<bool>(b, score.Impact, score.Enabled));
+                                    break;
+                                }
+                            case Int64 i:
+                                {
+                                    property.SetValue(this, new Score<int>(
+                                        Convert.ToInt32(i),
+                                        score.Impact,
+                                        score.Enabled));
+                                    break;
+                                }
+                            default:
+                                {
+                                    throw new Exception($"Unknown config type {score.Value.GetType()} for {key}");
+                                }
+                        }
+                    }
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
+        }
     }
 
     class Score<T>
     {
-        public bool Enabled { get; private set; }
+        public bool Enabled { get; set; }
 
-        public T Value { get; private set; }
+        public T Value { get; set; }
 
-        public double Impact { get; private set; }
+        public double Impact { get; set; }
 
         public Score(T value, double impact, bool enabled = true)
         {

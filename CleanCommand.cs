@@ -1,18 +1,21 @@
-using System.Linq;
-using System;
-using System.Threading.Tasks;
-using Tweetinvi.Models;
-using Tweetinvi;
-using System.CommandLine;
-using System.CommandLine.Invocation;
-
 namespace twot
 {
+    using System.Linq;
+    using System;
+    using System.Threading.Tasks;
+    using Tweetinvi.Models;
+    using Tweetinvi;
+    using System.CommandLine;
+    using System.CommandLine.Invocation;
+
     class CleanCommand : ICommand
     {
         public void AddCommand(Command rootCommand)
         {
             var cmd = new Command("Clean", "Scores everyone who follows the supplied user and if they do not meet a min-score they get blocked and unblocked which forces them to unfollow you.");
+            cmd.AddAlias("clean");
+            cmd.AddAlias("c");
+
             var dryRunOption = new Option<bool>("--dryrun", "Does not actually make the changes");
             cmd.Add(dryRunOption);
 
