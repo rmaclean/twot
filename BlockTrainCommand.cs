@@ -1,17 +1,19 @@
-using System.Linq;
-using System;
-using System.Threading.Tasks;
-using Tweetinvi;
-using System.CommandLine;
-using System.CommandLine.Invocation;
-
 namespace twot
 {
+    using System.Linq;
+    using System;
+    using System.Threading.Tasks;
+    using Tweetinvi;
+    using System.CommandLine;
+    using System.CommandLine.Invocation;
+
     class BlockTrain : ICommand
     {
         public void AddCommand(Command rootCommand)
         {
             var cmd = new Command("BlockTrain", "Blocks someone, and everyone which follows them.");
+            cmd.AddAlias("blocktrain");
+            cmd.AddAlias("bt");
 
             var dryRunOption = new Option<bool>("--dryrun", "Does not actually make the changes");
             cmd.Add(dryRunOption);

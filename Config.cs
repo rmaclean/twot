@@ -1,11 +1,10 @@
-
-using System;
-using Microsoft.Extensions.Configuration;
-using System.Reflection;
-using System.Linq;
-
 namespace twot
 {
+    using System;
+    using Microsoft.Extensions.Configuration;
+    using System.Reflection;
+    using System.Linq;
+
     class Config
     {
         [ConfigInfo(DisplayName = "API Key", ConfigProperty = "apikey")]

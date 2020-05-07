@@ -33,14 +33,18 @@ Follow [this guide](https://docs.microsoft.com/en-us/aspnet/core/security/app-se
 
 Run the following commands setting the various keys:
 
-- `dotnet user-secrets set "twot:apikey" "???"`  
-- `dotnet user-secrets set "twot:apisecret" "???"`  
-- `dotnet user-secrets set "twot:accesstoken" "???"`  
-- `dotnet user-secrets set "twot:accesssecret" "???"`  
+- `dotnet user-secrets set "twot:apikey" "???"`
+- `dotnet user-secrets set "twot:apisecret" "???"`
+- `dotnet user-secrets set "twot:accesstoken" "???"`
+- `dotnet user-secrets set "twot:accesssecret" "???"`
 
 ## Using
 
-Execute Twot followed by a command, currently there are three: Ready, BlockTrain and Clean (they are case sensitive).
+Execute Twot followed by a command, currently there are a number of commands:
+- Ready: This helps check your configuration
+- Init: This helps setup config files for you
+- BlockTrain: This blocks a Twitter user and all their followers
+- Clean: This kicks people from following you (uses block and then unblock), based on a score
 
 ### Common parameters
 
@@ -49,6 +53,10 @@ Both BlockTrain and Clean accept a dry run parameter, which is specified with `-
 ### Ready
 
 Running this command will tell you if you are correctly setup. This is useful to verify the API secrets.
+
+### Init
+
+Init helps setup the environment. You can create a `secret.json` by passing in `secrets`, for the configuration for Twitter. You can create a `score.json` by passing in `score`, for use with the Clean command.
 
 ### BlockTrain
 
@@ -83,3 +91,143 @@ Each rule is applied to a follower and if they exceed the configuration they wil
 11. Tweeted more than 90 days ago: +0.5
 12. Tweeted more than 365 days ago: +1
 13. Follows more than 5k people: +0.3
+
+#### Overriding Scoring Rules
+If you do not like the scoring rules, they can be overriden by creating a file called `score.json` and changing the values in it.
+
+Each item in the config is added as follows:
+```json
+  "Key": {
+    "Enabled": true,
+    "Value": true,
+    "Impact": 1.0
+  },
+```
+
+Break down:
+- `Key` refers to a unique key for each setting. Only the keys which you are changing need to be specified but all three of the properties in each key must be specified for all supplied keys.
+- `Enabled` is true or false to enable the rule.
+- `Value` is what to use in the compare
+- `Impact` this is how much of an impact it has on the score.
+
+##### Examples
+
+Here are some examples of making changes
+
+###### Make it so having the default impact image to be 1 tenth the default
+```json
+{
+  "DefaultProfileImage": {
+    "Enabled": true,
+    "Value": true,
+    "Impact": 0.1
+  }
+}
+```
+
+###### Make it so NOT having the default impact image is bad
+```json
+{
+  "DefaultProfileImage": {
+    "Enabled": true,
+    "Value": false,
+    "Impact": 1.0
+  }
+}
+```
+
+###### Disable the rules for large/corporate accounts
+```json
+{
+  "FollowersLarge": {
+    "Enabled": false,
+    "Value": 10000,
+    "Impact": 0.2
+  },
+  "FollowersExtraLarge": {
+    "Enabled": false,
+    "Value": 25000,
+    "Impact": 0.7
+  },
+  "FollowingMoreThan": {
+    "Enabled": false,
+    "Value": 5000,
+    "Impact": 0.3
+  }
+}
+```
+
+
+##### Default score.json
+
+You can also run `init score` to generate this.
+
+```json
+{
+  "DefaultProfileImage": {
+    "Enabled": true,
+    "Value": true,
+    "Impact": 1.0
+  },
+  "DescriptionLength": {
+    "Enabled": true,
+    "Value": 0,
+    "Impact": 0.3
+  },
+  "Favourites": {
+    "Enabled": true,
+    "Value": 0,
+    "Impact": 0.8
+  },
+  "FriendsLessThan": {
+    "Enabled": true,
+    "Value": 20,
+    "Impact": 0.5
+  },
+  "LocationLength": {
+    "Enabled": true,
+    "Value": 0,
+    "Impact": 0.2
+  },
+  "FollowersLarge": {
+    "Enabled": true,
+    "Value": 10000,
+    "Impact": 0.2
+  },
+  "FollowersExtraLarge": {
+    "Enabled": true,
+    "Value": 25000,
+    "Impact": 0.7
+  },
+  "TweetsLessThan": {
+    "Enabled": true,
+    "Value": 10,
+    "Impact": 0.3
+  },
+  "ZeroTweets": {
+    "Enabled": true,
+    "Value": 0,
+    "Impact": 0.5
+  },
+  "TweetedInLastWeek": {
+    "Enabled": true,
+    "Value": true,
+    "Impact": -0.4
+  },
+  "TweetedMoreThan90Days": {
+    "Enabled": true,
+    "Value": true,
+    "Impact": 0.5
+  },
+  "TweetedMoreThan1Year": {
+    "Enabled": true,
+    "Value": true,
+    "Impact": 1.0
+  },
+  "FollowingMoreThan": {
+    "Enabled": true,
+    "Value": 5000,
+    "Impact": 0.3
+  }
+}
+```

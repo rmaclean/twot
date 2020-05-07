@@ -1,12 +1,11 @@
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using Newtonsoft.Json;
-using System.Linq;
-using System;
-
 namespace twot
 {
+    using System.Collections.Generic;
+    using System.IO;
+    using Newtonsoft.Json;
+    using System.Linq;
+    using System;
+
     class ScoreConfig
     {
         public Score<bool> DefaultProfileImage { get; private set; } = new Score<bool>(true, 1);
@@ -38,19 +37,31 @@ namespace twot
                         switch (score.Value)
                         {
                             case bool b:
-                            {
-                                property.SetValue(this, new Score<bool>(b, score.Impact, score.Enabled));
-                                break;
-                            }
-                            case int i:
-                            {
-                                property.SetValue(this, new Score<int>(i, score.Impact, score.Enabled));
-                                break;
-                            }
+                                {
+                                    property.SetValue(this, new Score<bool>(b, score.Impact, score.Enabled));
+                                    break;
+                                }
+                            case Int64 i:
+                                {
+                                    property.SetValue(this, new Score<int>(
+                                        Convert.ToInt32(i),
+                                        score.Impact,
+                                        score.Enabled));
+                                    break;
+                                }
+                            default:
+                                {
+                                    throw new Exception($"Unknown config type {score.Value.GetType()} for {key}");
+                                }
                         }
                     }
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
     }
 
