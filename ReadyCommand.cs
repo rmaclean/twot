@@ -1,3 +1,4 @@
+using System.Threading;
 namespace twot
 {
     using System;
@@ -44,6 +45,8 @@ namespace twot
                 {
                     Console.WriteLine("🛑 Score config incorrect");
                 }
+            } else {
+                Console.WriteLine($"✅ No score.json found");
             }
         }
     }

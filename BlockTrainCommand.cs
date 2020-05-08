@@ -6,6 +6,7 @@ namespace twot
     using Tweetinvi;
     using System.CommandLine;
     using System.CommandLine.Invocation;
+    using ShellProgressBar;
 
     class BlockTrain : ICommand
     {
@@ -33,10 +34,10 @@ namespace twot
             Console.WriteLine("Block Train 🚂");
             if (dryRun)
             {
-                Console.WriteLine("  ⚠ Dry run mode");
+                Console.WriteLine(" ⚠ Dry run mode");
             }
 
-            Console.WriteLine($"Blocking @{targetUsername} and everyone who follows them.");
+            Console.WriteLine();
 
             var me = User.GetAuthenticatedUser();
             var friends = await me.GetFriendsAsync(Int32.MaxValue);
@@ -44,20 +45,29 @@ namespace twot
             var target = User.GetUserFromScreenName(targetUsername);
             var enermies = await target.GetFollowersAsync(Int32.MaxValue);
 
-            await target.BlockAsync();
-
             var targetsForBlock = enermies.Where(enermy => !friends.Contains(enermy));
+            var options = new ProgressBarOptions {
+                BackgroundCharacter = '\u2593',
+            };
 
-            foreach (var targetName in targetsForBlock.AsParallel())
+            using (var pbar = new ProgressBar(enermies.Count() + 1, $"Blocking @{targetUsername} and everyone " +
+                "who follows them.", options))
             {
-                Console.WriteLine(targetName);
-                if (!dryRun)
+                await target.BlockAsync();
+                pbar.Tick($"Blocked @{targetUsername}");
+
+                foreach (var targetName in targetsForBlock.AsParallel())
                 {
-                    User.BlockUser(targetName);
+                    if (!dryRun)
+                    {
+                        User.BlockUser(targetName);
+                    }
+
+                    pbar.Tick($"Blocked @{targetName}");
                 }
             }
 
-            Console.WriteLine($"Blocked {targetsForBlock.Count()}");
+            Console.WriteLine($"Blocked a total of {targetsForBlock.Count() + 1 } people");
         }
     }
 }

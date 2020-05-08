@@ -7,6 +7,7 @@ namespace twot
     using Tweetinvi;
     using System.CommandLine;
     using System.CommandLine.Invocation;
+    using ShellProgressBar;
 
     class CleanCommand : ICommand
     {
@@ -34,15 +35,13 @@ namespace twot
 
         private async Task Execute(bool dryRun, double minScore)
         {
-            Console.WriteLine("Running cleanup 🧹");
+            Console.WriteLine("Running clean 🧹");
             if (dryRun)
             {
-                Console.WriteLine("  ⚠ Dry run mode");
+                Console.WriteLine(" ⚠ Dry run mode");
             }
 
             var me = User.GetAuthenticatedUser();
-            Console.WriteLine($"Cleaning the followers of @{me.ScreenName}.");
-            Console.WriteLine($"Min score: {minScore}");
 
             var friends = await me.GetFriendIdsAsync(Int32.MaxValue);
             var followers = await me.GetFollowersAsync(Int32.MaxValue);
@@ -55,18 +54,28 @@ namespace twot
                 .Where(_ => _.Score > minScore)
                 .OrderBy(_ => _.Follower.Name);
 
-            foreach (var (follower, score) in botsOrDead.AsParallel())
+            var options = new ProgressBarOptions
             {
-                Console.WriteLine($"{follower} {score}\n\t@{follower.UserIdentifier.ScreenName} {follower.FollowersCount} {follower.Status?.CreatedAt}");
-                Console.WriteLine();
-                if (!dryRun)
+                BackgroundCharacter = '\u2593',
+            };
+
+            var total = botsOrDead.Count();
+            using (var pbar = new ProgressBar(total, $"Cleaning the followers of @{me.ScreenName} with a score below" +
+                $"{minScore}", options))
+            {
+                foreach (var (follower, score) in botsOrDead.AsParallel())
                 {
-                    await follower.BlockAsync();
-                    await follower.UnBlockAsync();
+                    if (!dryRun)
+                    {
+                        await follower.BlockAsync();
+                        await follower.UnBlockAsync();
+                    }
+
+                    pbar.Tick($"Kicked @{follower.UserIdentifier.ScreenName} from following you");
                 }
             }
 
-            Console.WriteLine(botsOrDead.Count());
+            Console.WriteLine($"Cleaned out {total} people who were following you.");
         }
 
         double Score(IUser follower, ScoreConfig scoring)
