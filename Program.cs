@@ -11,6 +11,7 @@
             new BlockTrain(),
             new ReadyCommand(),
             new InitCommand(),
+            new ScoreCommand(),
         };
 
         static void EnableUTFConsole()
