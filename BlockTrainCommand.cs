@@ -56,7 +56,7 @@ namespace twot
                 BackgroundCharacter = '\u2593',
             };
 
-            using (var logger = new ThreadedLogger("BlockTrain.log", true))
+            using (var logger = new ThreadedLogger("BlockTrain.log", log))
             using (var pbar = new ProgressBar(enermies.Count() + 1, $"Blocking @{targetUsername} and everyone " +
                 "who follows them.", options))
             {
