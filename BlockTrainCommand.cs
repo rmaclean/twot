@@ -25,11 +25,17 @@ namespace twot
             targetOption.Required = true;
             cmd.Add(targetOption);
 
-            cmd.Handler = CommandHandler.Create<bool, string>(Execute);
+            var logOption = new Option<bool>("--log", "Creates (or appends if the file exists) a log of all the " +
+                "accounts impacted by the BlockTrain");
+            logOption.Name = "log";
+            logOption.AddAlias("-l");
+            cmd.Add(logOption);
+
+            cmd.Handler = CommandHandler.Create<bool, string, bool>(Execute);
             rootCommand.Add(cmd);
         }
 
-        private async Task Execute(bool dryRun, string targetUsername)
+        private async Task Execute(bool dryRun, string targetUsername, bool log)
         {
             Console.WriteLine("Block Train 🚂");
             if (dryRun)
@@ -50,11 +56,16 @@ namespace twot
                 BackgroundCharacter = '\u2593',
             };
 
+            using (var logger = new ThreadedLogger("BlockTrain.log", true))
             using (var pbar = new ProgressBar(enermies.Count() + 1, $"Blocking @{targetUsername} and everyone " +
                 "who follows them.", options))
             {
+                logger.LogMessage($"# BlockTrain started {DateTime.Now.ToLongDateString()} " +
+                    $"{DateTime.Now.ToLongTimeString()}");
+
                 await target.BlockAsync();
                 pbar.Tick($"Blocked @{targetUsername}");
+                logger.LogMessage(targetUsername);
 
                 foreach (var targetName in targetsForBlock.AsParallel())
                 {
@@ -64,6 +75,7 @@ namespace twot
                     }
 
                     pbar.Tick($"Blocked @{targetName}");
+                    logger.LogMessage(targetName!.ScreenName);
                 }
             }
 
