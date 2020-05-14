@@ -52,13 +52,10 @@ namespace twot
             var enermies = await target.GetFollowersAsync(Int32.MaxValue);
 
             var targetsForBlock = enermies.Where(enermy => !friends.Contains(enermy));
-            var options = new ProgressBarOptions {
-                BackgroundCharacter = '\u2593',
-            };
 
             using (var logger = new ThreadedLogger("BlockTrain.log", log))
             using (var pbar = new ProgressBar(enermies.Count() + 1, $"Blocking @{targetUsername} and everyone " +
-                "who follows them.", options))
+                "who follows them."))
             {
                 logger.LogMessage($"# BlockTrain started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");
@@ -67,15 +64,15 @@ namespace twot
                 pbar.Tick($"Blocked @{targetUsername}");
                 logger.LogMessage(targetUsername);
 
-                foreach (var targetName in targetsForBlock.AsParallel())
+                foreach (var targetUser in targetsForBlock.AsParallel())
                 {
                     if (!dryRun)
                     {
-                        User.BlockUser(targetName);
+                        await targetUser!.BlockAsync();
                     }
 
-                    pbar.Tick($"Blocked @{targetName}");
-                    logger.LogMessage(targetName!.ScreenName);
+                    pbar.Tick($"Blocked @{targetUser.ScreenName}");
+                    logger.LogMessage(targetUser!.ScreenName);
                 }
             }
 

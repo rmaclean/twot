@@ -1,4 +1,3 @@
-using System.Threading;
 namespace twot
 {
     using System;
@@ -6,6 +5,7 @@ namespace twot
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using System.IO;
+    using System.Linq;
 
     class ReadyCommand : ICommand
     {
@@ -33,6 +33,7 @@ namespace twot
             }
 
             Console.WriteLine($"✅ Config correct for @{me.ScreenName}");
+            Console.WriteLine($" You have blocked {me.GetBlockedUserIds().Count()} people");
 
             if (File.Exists("score.json"))
             {
@@ -45,7 +46,9 @@ namespace twot
                 {
                     Console.WriteLine("🛑 Score config incorrect");
                 }
-            } else {
+            }
+            else
+            {
                 Console.WriteLine($"✅ No score.json found");
             }
         }

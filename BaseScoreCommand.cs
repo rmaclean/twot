@@ -1,4 +1,3 @@
-using System.Threading;
 namespace twot
 {
     using System.Linq;
@@ -35,14 +34,9 @@ namespace twot
                 .Where(_ => _.Score > minScore)
                 .OrderBy(_ => _.Follower.Name);
 
-            var options = new ProgressBarOptions
-            {
-                BackgroundCharacter = '\u2593',
-            };
-
             var total = botsOrDead.Count();
             using (var logger = new ThreadedLogger($"{settings.mode}.log", true))
-            using (var pbar = new ProgressBar(total, settings.progressBarMessage, options))
+            using (var pbar = new ProgressBar(total, settings.progressBarMessage))
             {
                 logger.LogMessage($"# {settings.mode} started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");
