@@ -6,7 +6,6 @@ namespace twot
     using Tweetinvi;
     using System.CommandLine;
     using System.CommandLine.Invocation;
-    using ShellProgressBar;
 
     class BlockTrain : ICommand
     {
@@ -54,8 +53,7 @@ namespace twot
             var targetsForBlock = enermies.Where(enermy => !friends.Contains(enermy));
 
             using (var logger = new ThreadedLogger("BlockTrain.log", log))
-            using (var pbar = new ProgressBar(enermies.Count() + 1, $"Blocking @{targetUsername} and everyone " +
-                "who follows them."))
+            using (var pbar = new ProgressBar(enermies.Count() + 1))
             {
                 logger.LogMessage($"# BlockTrain started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");

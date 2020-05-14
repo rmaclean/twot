@@ -88,6 +88,7 @@ namespace twot
             terminate.Set();
             loggingThread?.Join();
             fileStream?.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

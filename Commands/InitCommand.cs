@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-
 namespace twot
 {
     using System;
@@ -50,19 +48,19 @@ namespace twot
             File.WriteAllText(file, content);
         }
     }
-}
 
-class SecretsConfig
-{
-    [JsonProperty(PropertyName = "twot:apikey")]
-    public string APIKey { get; set; } = "";
+    class SecretsConfig
+    {
+        [JsonProperty(PropertyName = "twot:apikey")]
+        public string APIKey { get; set; } = "";
 
-    [JsonProperty(PropertyName = "twot:apisecret")]
-    public string APISecret { get; set; } = "";
+        [JsonProperty(PropertyName = "twot:apisecret")]
+        public string APISecret { get; set; } = "";
 
-    [JsonProperty(PropertyName = "twot:accesstoken")]
-    public string AccessToken { get; set; } = "";
+        [JsonProperty(PropertyName = "twot:accesstoken")]
+        public string AccessToken { get; set; } = "";
 
-    [JsonProperty(PropertyName = "twot:accesssecret")]
-    public string AccessSecret { get; set; } = "";
+        [JsonProperty(PropertyName = "twot:accesssecret")]
+        public string AccessSecret { get; set; } = "";
+    }
 }

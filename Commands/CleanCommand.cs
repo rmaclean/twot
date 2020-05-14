@@ -1,14 +1,9 @@
-using System.Threading;
 namespace twot
 {
-    using System.Linq;
     using System;
     using System.Threading.Tasks;
-    using Tweetinvi.Models;
-    using Tweetinvi;
     using System.CommandLine;
     using System.CommandLine.Invocation;
-    using ShellProgressBar;
 
     class CleanCommand : BaseScoreCommand, ICommand
     {
@@ -51,7 +46,6 @@ namespace twot
             await Run(minScore, new ScoreSettings
             {
                 mode = "Clean",
-                progressBarMessage = $"Cleaning the followers of with a score below {minScore}",
                 onComplete = total => Console.WriteLine($"Kicked {total} people who were following you."),
                 onUserAsync = async (user) =>
                 {
