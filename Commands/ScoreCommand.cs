@@ -34,7 +34,6 @@ namespace twot
             await Run(minScore, new ScoreSettings
             {
                 mode = "Score",
-                progressBarMessage = $"Logging the followers of with a score below {minScore}",
                 onComplete = total => Console.WriteLine($"Scored {total} people who were following you."),
                 onUser = (user, logger, score) => logger.LogMessage($"{user!.UserIdentifier.ScreenName}, {score:F2}"),
                 beforeRun = logger =>

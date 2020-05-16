@@ -2,17 +2,21 @@
 {
     using System;
     using System.CommandLine;
+    using System.Reflection;
     using Tweetinvi;
+    using System.Linq;
+    using System.Collections.Generic;
 
     class Program
     {
-        static ICommand[] commands = {
-            new CleanCommand(),
-            new BlockTrain(),
-            new ReadyCommand(),
-            new InitCommand(),
-            new ScoreCommand(),
-        };
+        static IEnumerable<ICommand> GetCommands()
+        {
+            return Assembly.GetAssembly(typeof(Program))!.GetTypes()
+                .Where(t => typeof(ICommand).IsAssignableFrom(t))
+                .Where(t => t.IsClass)
+                .Select(commandInterface => Activator.CreateInstance(commandInterface) as ICommand)
+                .Select(commandObject => commandObject!);
+        }
 
         static void EnableUTFConsole()
         {
@@ -35,7 +39,7 @@
             Auth.SetUserCredentials(config.APIKey, config.APISecret, config.AccessToken, config.AccessSecret);
 
             var rootCommand = new RootCommand("Twot: Making Twitter Better");
-            foreach (var command in commands)
+            foreach (var command in GetCommands())
             {
                 command.AddCommand(rootCommand);
             }

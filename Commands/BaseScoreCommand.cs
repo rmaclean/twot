@@ -1,4 +1,3 @@
-using System.Threading;
 namespace twot
 {
     using System.Linq;
@@ -6,12 +5,10 @@ namespace twot
     using System.Threading.Tasks;
     using Tweetinvi.Models;
     using Tweetinvi;
-    using ShellProgressBar;
 
     class ScoreSettings
     {
         public string mode { get; set; } = "";
-        public string progressBarMessage { get; set; } = "";
         public Action<int>? onComplete { get; set; }
         public Func<IUser?, Task>? onUserAsync { get; set; }
         public Action<IUser?, ThreadedLogger, double>? onUser { get; set; }
@@ -35,14 +32,9 @@ namespace twot
                 .Where(_ => _.Score > minScore)
                 .OrderBy(_ => _.Follower.Name);
 
-            var options = new ProgressBarOptions
-            {
-                BackgroundCharacter = '\u2593',
-            };
-
             var total = botsOrDead.Count();
             using (var logger = new ThreadedLogger($"{settings.mode}.log", true))
-            using (var pbar = new ProgressBar(total, settings.progressBarMessage, options))
+            using (var pbar = new ProgressBar(total))
             {
                 logger.LogMessage($"# {settings.mode} started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");

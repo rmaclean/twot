@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace twot
 {
     using System.Linq;
@@ -6,7 +7,7 @@ namespace twot
     using Tweetinvi;
     using System.CommandLine;
     using System.CommandLine.Invocation;
-    using ShellProgressBar;
+    using Tweetinvi.Models;
 
     class BlockTrain : ICommand
     {
@@ -35,6 +36,26 @@ namespace twot
             rootCommand.Add(cmd);
         }
 
+        private async Task<List<IUser>> GetTargets(string targetUsername)
+        {
+            using (var spinner = new Spinner())
+            {
+                var result = new List<IUser>();
+                var me = User.GetAuthenticatedUser();
+                var friends = await me.GetFriendsAsync(Int32.MaxValue);
+
+                var target = User.GetUserFromScreenName(targetUsername);
+                result.Add(target);
+
+                var enermies = await target.GetFollowersAsync(Int32.MaxValue);
+
+                var targetsForBlock = enermies.Where(enermy => !friends.Contains(enermy));
+                result.AddRange(enermies);
+                spinner.Done();
+                return result;
+            }
+        }
+
         private async Task Execute(bool dryRun, string targetUsername, bool log)
         {
             Console.WriteLine("Block Train 🚂");
@@ -45,41 +66,28 @@ namespace twot
 
             Console.WriteLine();
 
-            var me = User.GetAuthenticatedUser();
-            var friends = await me.GetFriendsAsync(Int32.MaxValue);
-
-            var target = User.GetUserFromScreenName(targetUsername);
-            var enermies = await target.GetFollowersAsync(Int32.MaxValue);
-
-            var targetsForBlock = enermies.Where(enermy => !friends.Contains(enermy));
-            var options = new ProgressBarOptions {
-                BackgroundCharacter = '\u2593',
-            };
+            Console.WriteLine("Loading people to block, this may take some time...");
+            var targets = await GetTargets(targetUsername);
 
             using (var logger = new ThreadedLogger("BlockTrain.log", log))
-            using (var pbar = new ProgressBar(enermies.Count() + 1, $"Blocking @{targetUsername} and everyone " +
-                "who follows them.", options))
+            using (var pbar = new ProgressBar(targets.Count))
             {
                 logger.LogMessage($"# BlockTrain started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");
 
-                await target.BlockAsync();
-                pbar.Tick($"Blocked @{targetUsername}");
-                logger.LogMessage(targetUsername);
-
-                foreach (var targetName in targetsForBlock.AsParallel())
+                foreach (var targetUser in targets)
                 {
                     if (!dryRun)
                     {
-                        User.BlockUser(targetName);
+                        await targetUser!.BlockAsync();
                     }
 
-                    pbar.Tick($"Blocked @{targetName}");
-                    logger.LogMessage(targetName!.ScreenName);
+                    pbar.Tick($"Blocked @{targetUser.ScreenName}");
+                    logger.LogMessage(targetUser!.ScreenName);
                 }
             }
 
-            Console.WriteLine($"Blocked a total of {targetsForBlock.Count() + 1 } people");
+            Console.WriteLine($"Blocked a total of { targets.Count } people");
         }
     }
 }
