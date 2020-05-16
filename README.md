@@ -54,13 +54,23 @@ Both BlockTrain and Clean accept a dry run parameter, which is specified with `-
 
 Running this command will tell you if you are correctly setup. This is useful to verify the API secrets.
 
+#### Synopsis
+<pre><strong>twot ready</strong></pre>
+
+
 ### Init
 
 Init helps setup the environment. You can create a `secret.json` by passing in `secrets`, for the configuration for Twitter. You can create a `score.json` by passing in `score`, for use with the Clean command.
 
+#### Synopsis
+<pre><strong>twot init</strong> [score [--file &lt;filename&gt;]] [secrets [--file &lt;filename&gt;]]</pre>
+
 ### BlockTrain
 
 This will allow you to block a user, and all their followers. In addtion to the common parameters, you just need to specify the targets username without the @, using `--target` or `-t`.
+
+#### Synopsis
+<pre><strong>twot BlockTrain</strong> [--dryrun] [--log | l] [--target | -t &lt;username&gt;]]</pre>
 
 #### BlockTrain and people you follow
 
@@ -70,11 +80,29 @@ People who you follow will not be blocked in the block train.
 
 This will allow you to "force unfollow", block and unblock a person which causes them to unfollow you, your followers based on a score. The goal is to get rid of bots and abandoned accounts. You do not need to provide anything beyond the common parameters, however there is a score parameter, `--score`, to change how aggressive you want to be.
 
-#### Clean and people you follow
+#### Synopsis
+<pre><strong>twot Clean</strong> [--dryrun] [--log | l] [--score | -s &lt;min score&gt;]</pre>
 
-People who you follow will not get unfollowed.
+### Score
 
-#### Scoring Rules
+This runs the same logic as *Clean* but does not make any actions and anyone who is below the score will be logged to the file. Logging is not optional on this one.
+
+#### Synopsis
+<pre><strong>twot Score</strong> [--score | -s &lt;min score&gt;]]</pre>
+
+### Unblock
+
+The unblock command will unblock a single person (with the *-t* parameter), a group of people from a file, such as the log file produced with *BlockTrain* and *Clean* (with the *-f* parameter) or everyone you have blocked (with the *--all* parameter).
+
+#### Synopsis
+<pre><strong>twot unblock</strong> [--dryrun] [--target | -t &lt;username&gt;] [--all] [--file | -f &lt;file&gt;]</pre>
+
+
+## Cleaning, blocking and people you follow
+
+People who you follow will not get unfollowed or blocked by the commands.
+
+## Scoring Rules
 
 Each rule is applied to a follower and if they exceed the configuration they will be blocked/unblocked.
 
