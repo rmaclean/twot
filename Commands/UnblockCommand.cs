@@ -98,7 +98,7 @@ namespace twot
                         await target.UnBlockAsync();
                     }
 
-                    pbar.Tick($"Blocked @{target.ScreenName}");
+                    pbar.Tick($"Unblocked @{target.ScreenName}");
                     logger.LogMessage(target!.ScreenName);
                 }
             }

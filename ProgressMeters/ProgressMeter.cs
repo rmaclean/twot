@@ -20,6 +20,7 @@ namespace twot
             cursorLine = Console.CursorTop + 1;
             if (cursorLine + 2 >= Console.WindowHeight)
             {
+                Console.WriteLine();
                 cursorLine -= 2;
             }
 
