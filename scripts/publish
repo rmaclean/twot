@@ -1,4 +1,5 @@
 #!/bin/bash
+cd ..
 rm -rf bin
 rm -rf Release
 mkdir Release
