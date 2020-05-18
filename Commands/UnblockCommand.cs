@@ -62,7 +62,10 @@ namespace twot
 
             if (all)
             {
-                accountsToUnblock = me.GetBlockedUsers().ToList();
+                using (var spinner = new Spinner())
+                {
+                    accountsToUnblock = me.GetBlockedUsers().ToList();
+                }
             }
             else
             {

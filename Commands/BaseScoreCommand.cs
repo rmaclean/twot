@@ -5,6 +5,7 @@ namespace twot
     using System.Threading.Tasks;
     using Tweetinvi.Models;
     using Tweetinvi;
+    using System.Collections.Generic;
 
     class ScoreSettings
     {
@@ -17,31 +18,39 @@ namespace twot
 
     class BaseScoreCommand
     {
+        internal async Task<List<(IUser, double)>> GetBotsOrDead(double minScore)
+        {
+            using (var spinner = new Spinner())
+            {
+                var me = User.GetAuthenticatedUser();
+
+                var friends = await me.GetFriendIdsAsync(Int32.MaxValue);
+                var followers = await me.GetFollowersAsync(Int32.MaxValue);
+
+                var scoringConfig = new ScoreConfig();
+
+                return followers
+                    .Where(_ => !friends.Contains(_.Id))
+                    .Select(Follower => (Follower, Score: Score(Follower, scoringConfig)))
+                    .Where(_ => _.Score > minScore)
+                    .OrderBy(_ => _.Follower.Name)
+                    .ToList();
+            }
+        }
+
         internal async Task Run(double minScore, ScoreSettings settings)
         {
-            var me = User.GetAuthenticatedUser();
-
-            var friends = await me.GetFriendIdsAsync(Int32.MaxValue);
-            var followers = await me.GetFollowersAsync(Int32.MaxValue);
-
-            var scoringConfig = new ScoreConfig();
-
-            var botsOrDead = followers
-                .Where(_ => !friends.Contains(_.Id))
-                .Select(Follower => (Follower, Score: Score(Follower, scoringConfig)))
-                .Where(_ => _.Score > minScore)
-                .OrderBy(_ => _.Follower.Name);
-
-            var total = botsOrDead.Count();
+            var botsOrDead = await GetBotsOrDead(minScore);
             using (var logger = new ThreadedLogger($"{settings.mode}.log", true))
-            using (var pbar = new ProgressBar(total))
+            using (var pbar = new ProgressBar(botsOrDead.Count))
             {
                 logger.LogMessage($"# {settings.mode} started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");
 
-                foreach (var (follower, score) in botsOrDead.AsParallel())
+                foreach (var (follower, score) in botsOrDead)
                 {
-                    if (settings.onUserAsync != null) {
+                    if (settings.onUserAsync != null)
+                    {
                         await settings.onUserAsync!.Invoke(follower!);
                     }
 
@@ -50,7 +59,7 @@ namespace twot
                 }
             }
 
-            settings.onComplete!.Invoke(total);
+            settings.onComplete!.Invoke(botsOrDead.Count);
         }
 
         double Score(IUser follower, ScoreConfig scoring)
