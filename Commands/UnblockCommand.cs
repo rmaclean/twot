@@ -43,12 +43,15 @@ namespace twot
             logOption.AddAlias("-l");
             cmd.Add(logOption);
 
-            cmd.Handler = CommandHandler.Create<bool, string, bool, string, bool>(Execute);
+            var unmuteOption = new Option<bool>("--unmute", "Rather than unblocking, this command will unmute the targets");
+            cmd.Add(unmuteOption);
+
+            cmd.Handler = CommandHandler.Create<bool, string, bool, string, bool, bool>(Execute);
             rootCommand.Add(cmd);
         }
 
 
-        private async Task Execute(bool dryRun, string targetUsername, bool all, string file, bool log)
+        private async Task Execute(bool dryRun, string targetUsername, bool all, string file, bool log, bool unmute)
         {
             Writeln(Cyan, "Unblock 🔁");
             if (dryRun)
@@ -66,7 +69,15 @@ namespace twot
             {
                 using (var spinner = new Spinner())
                 {
-                    accountsToUnblock = me.GetBlockedUsers().ToList();
+                    if (unmute)
+                    {
+                        accountsToUnblock = Account.GetMutedUsers(Int32.MaxValue).ToList();
+                    }
+                    else
+                    {
+                        accountsToUnblock = me.GetBlockedUsers().ToList();
+                    }
+
                     spinner.Done();
                 }
             }
@@ -101,15 +112,22 @@ namespace twot
                 {
                     if (!dryRun)
                     {
-                        await target.UnBlockAsync();
+                        if (unmute)
+                        {
+                            Account.UnMuteUser(target.UserIdentifier);
+                        }
+                        else
+                        {
+                            await target.UnBlockAsync();
+                        }
                     }
 
-                    pbar.Tick($"Unblocked @{target.ScreenName}");
+                    pbar.Tick($"{(unmute ? "Unmuted" : "Unblocked")} @{target.ScreenName}");
                     logger.LogMessage(target!.ScreenName);
                 }
             }
 
-            Writeln(Green, $"Unblocked a total of {accountsToUnblock.Count} people");
+            Writeln(Green, $"{(unmute ? "Unmuted" : "Unblocked")} a total of {accountsToUnblock.Count} people");
         }
     }
 }

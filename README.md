@@ -259,3 +259,8 @@ You can also run `init score` to generate this.
   }
 }
 ```
+
+---
+
+Twot is developed for free. All donations are greatly appreciated.
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=67ACBPYYG295C&currency_code=ZAR&source=url)

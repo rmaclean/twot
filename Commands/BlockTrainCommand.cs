@@ -34,7 +34,11 @@ namespace twot
             logOption.AddAlias("-l");
             cmd.Add(logOption);
 
-            cmd.Handler = CommandHandler.Create<bool, string, bool>(Execute);
+            var muteOption = new Option<bool>("--mute", "Rather than blocking, this command will mute the targets");
+            muteOption.AddAlias("-m");
+            cmd.Add(muteOption);
+
+            cmd.Handler = CommandHandler.Create<bool, string, bool, bool>(Execute);
             rootCommand.Add(cmd);
         }
 
@@ -58,7 +62,7 @@ namespace twot
             }
         }
 
-        private async Task Execute(bool dryRun, string targetUsername, bool log)
+        private async Task Execute(bool dryRun, string targetUsername, bool log, bool mute)
         {
             Writeln(Cyan, "Block Train 🚂");
             if (dryRun)
@@ -81,15 +85,22 @@ namespace twot
                 {
                     if (!dryRun)
                     {
-                        await targetUser!.BlockAsync();
+                        if (mute)
+                        {
+                            Tweetinvi.Account.MuteUser(targetUser.UserIdentifier);
+                        }
+                        else
+                        {
+                            await targetUser!.BlockAsync();
+                        }
                     }
 
-                    pbar.Tick($"Blocked @{targetUser.ScreenName}");
+                    pbar.Tick($"{(mute ? "Muted" : "Blocked")} @{targetUser.ScreenName}");
                     logger.LogMessage(targetUser!.ScreenName);
                 }
             }
 
-            Writeln(Green, $"Blocked a total of { targets.Count } people");
+            Writeln(Green, $"{(mute ? "Muted" : "Blocked")} a total of { targets.Count } people");
         }
     }
 }
