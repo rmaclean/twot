@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>cf75e60f-09c7-4d5f-b1ef-8389a7803fc8</UserSecretsId>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
