@@ -9,6 +9,8 @@ namespace twot
     using Tweetinvi;
     using Tweetinvi.Models;
     using System.IO;
+    using static ConsoleHelper;
+    using static System.ConsoleColor;
 
     class UnblockCommand : ICommand
     {
@@ -48,10 +50,10 @@ namespace twot
 
         private async Task Execute(bool dryRun, string targetUsername, bool all, string file, bool log)
         {
-            Console.WriteLine("Unblock 🔁");
+            Writeln(Cyan, "Unblock 🔁");
             if (dryRun)
             {
-                Console.WriteLine(" ⚠ Dry run mode");
+                Writeln(Yellow, " ⚠ Dry run mode");
             }
 
             Console.WriteLine();
@@ -65,6 +67,7 @@ namespace twot
                 using (var spinner = new Spinner())
                 {
                     accountsToUnblock = me.GetBlockedUsers().ToList();
+                    spinner.Done();
                 }
             }
             else
@@ -106,7 +109,7 @@ namespace twot
                 }
             }
 
-            Console.WriteLine($"Unblocked a total of {accountsToUnblock.Count} people");
+            Writeln(Green, $"Unblocked a total of {accountsToUnblock.Count} people");
         }
     }
 }

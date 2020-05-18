@@ -3,13 +3,13 @@ namespace twot
     using System;
     using System.Threading;
 
-    class ProgressBar : ProgressMeter, IDisposable
+    class ProgressBar : ProgressMeter
     {
-        int steps;
+        readonly int steps;
         double done;
         string message = "";
-        char block = '█';
-        char background = '░';
+        readonly char block = '█';
+        readonly char background = '░';
         double percentage;
 
         public ProgressBar(int steps): base(33)

@@ -3,15 +3,15 @@ namespace twot
     using System;
     using System.Threading;
 
-    abstract class ProgressMeter
+    abstract class ProgressMeter: IDisposable
     {
-        int cursorLine;
-        ConsoleColor originalColour;
-        bool originalCursorVisible;
-        Timer? timer;
+        readonly int cursorLine;
+        readonly ConsoleColor originalColour;
+        readonly bool originalCursorVisible;
+        readonly Timer? timer;
         internal AutoResetEvent? doneEvent;
 
-        internal ProgressMeter(int updateSpeedMs)
+        protected ProgressMeter(int updateSpeedMs)
         {
             if (Console.IsOutputRedirected) {
                 return;

@@ -5,7 +5,7 @@ namespace twot
     class Spinner : ProgressMeter, IDisposable
     {
         int step;
-        string[] steps = new[] { "|", "/", "-", "\\" };
+        readonly string[] steps = new[] { "|", "/", "-", "\\" };
 
         public Spinner() : base(200) { }
 

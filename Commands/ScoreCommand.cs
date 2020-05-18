@@ -4,6 +4,8 @@ namespace twot
     using System.Threading.Tasks;
     using System.CommandLine;
     using System.CommandLine.Invocation;
+    using static ConsoleHelper;
+    using static System.ConsoleColor;
 
     class ScoreCommand : BaseScoreCommand, ICommand
     {
@@ -30,8 +32,8 @@ namespace twot
 
         private async Task Execute(double minScore)
         {
-            Console.WriteLine("Running Score 🥅");
-            await Run(minScore, new ScoreSettings
+            Writeln(Cyan, "Running Score 🥅");
+            await Run(minScore, true, new ScoreSettings
             {
                 mode = "Score",
                 onComplete = total => Console.WriteLine($"Scored {total} people who were following you."),

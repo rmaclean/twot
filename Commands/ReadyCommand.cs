@@ -6,6 +6,8 @@ namespace twot
     using System.CommandLine.Invocation;
     using System.IO;
     using System.Linq;
+    using static ConsoleHelper;
+    using static System.ConsoleColor;
 
     class ReadyCommand : ICommand
     {
@@ -21,35 +23,35 @@ namespace twot
 
         private void Execute()
         {
-            Console.WriteLine("Ready ❔");
+            Writeln(Cyan, "Ready ❔");
 
             var me = User.GetAuthenticatedUser();
             if (me == null)
             {
-                Console.WriteLine("🛑 Config incorrect");
+                Writeln(Red, "🛑 Config incorrect");
                 var latestException = ExceptionHandler.GetLastException();
-                Console.WriteLine($"  {latestException.TwitterDescription}");
+                Writeln(DarkRed, $"  {latestException.TwitterDescription}");
                 return;
             }
 
-            Console.WriteLine($"✅ Config correct for @{me.ScreenName}");
-            Console.WriteLine($" You have blocked {me.GetBlockedUserIds().Count()} people");
+            Writeln(Green, $"✅ Config correct for @{me.ScreenName}");
+            Writeln(Green, $" You have blocked {me.GetBlockedUserIds().Count()} people");
 
             if (File.Exists("score.json"))
             {
                 try
                 {
                     new ScoreConfig();
-                    Console.WriteLine($"✅ Score config correct for Clean command");
+                    Writeln(Green, $"✅ Score config correct for Clean command");
                 }
                 catch
                 {
-                    Console.WriteLine("🛑 Score config incorrect");
+                    Writeln(Red, "🛑 Score config incorrect");
                 }
             }
             else
             {
-                Console.WriteLine($"✅ No score.json found");
+                Writeln(DarkGreen, $"✅ No score.json found");
             }
         }
     }

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 namespace twot
 {
     using System.Linq;
@@ -8,6 +7,9 @@ namespace twot
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using Tweetinvi.Models;
+    using System.Collections.Generic;
+    using static ConsoleHelper;
+    using static System.ConsoleColor;
 
     class BlockTrain : ICommand
     {
@@ -50,7 +52,7 @@ namespace twot
                 var enermies = await target.GetFollowersAsync(Int32.MaxValue);
 
                 var targetsForBlock = enermies.Where(enermy => !friends.Contains(enermy));
-                result.AddRange(enermies);
+                result.AddRange(targetsForBlock);
                 spinner.Done();
                 return result;
             }
@@ -58,16 +60,16 @@ namespace twot
 
         private async Task Execute(bool dryRun, string targetUsername, bool log)
         {
-            Console.WriteLine("Block Train 🚂");
+            Writeln(Cyan, "Block Train 🚂");
             if (dryRun)
             {
-                Console.WriteLine(" ⚠ Dry run mode");
+                Writeln(Yellow, " ⚠ Dry run mode");
             }
 
             Console.WriteLine();
 
-            Console.WriteLine("Loading people to block, this may take some time...");
-            var targets = await GetTargets(targetUsername);
+            Writeln(DarkBlue, "Loading people to block, this may take some time...");
+            var targets = await GetTargets(targetUsername).ConfigureAwait(false);
 
             using (var logger = new ThreadedLogger("BlockTrain.log", log))
             using (var pbar = new ProgressBar(targets.Count))
@@ -87,7 +89,7 @@ namespace twot
                 }
             }
 
-            Console.WriteLine($"Blocked a total of { targets.Count } people");
+            Writeln(Green, $"Blocked a total of { targets.Count } people");
         }
     }
 }

@@ -6,6 +6,8 @@ namespace twot
     using Tweetinvi.Models;
     using Tweetinvi;
     using System.Collections.Generic;
+    using static ConsoleHelper;
+    using static System.ConsoleColor;
 
     class ScoreSettings
     {
@@ -20,6 +22,7 @@ namespace twot
     {
         internal async Task<List<(IUser, double)>> GetBotsOrDead(double minScore)
         {
+            Writeln(DarkBlue, "Loading people, this may take some time...");
             using (var spinner = new Spinner())
             {
                 var me = User.GetAuthenticatedUser();
@@ -29,19 +32,21 @@ namespace twot
 
                 var scoringConfig = new ScoreConfig();
 
-                return followers
+                var result = followers
                     .Where(_ => !friends.Contains(_.Id))
                     .Select(Follower => (Follower, Score: Score(Follower, scoringConfig)))
                     .Where(_ => _.Score > minScore)
-                    .OrderBy(_ => _.Follower.Name)
-                    .ToList();
+                    .OrderBy(_ => _.Follower.Name);
+
+                spinner.Done();
+                return result.ToList();
             }
         }
 
-        internal async Task Run(double minScore, ScoreSettings settings)
+        internal async Task Run(double minScore, bool log, ScoreSettings settings)
         {
             var botsOrDead = await GetBotsOrDead(minScore);
-            using (var logger = new ThreadedLogger($"{settings.mode}.log", true))
+            using (var logger = new ThreadedLogger($"{settings.mode}.log", log))
             using (var pbar = new ProgressBar(botsOrDead.Count))
             {
                 logger.LogMessage($"# {settings.mode} started {DateTime.Now.ToLongDateString()} " +
@@ -51,7 +56,7 @@ namespace twot
                 {
                     if (settings.onUserAsync != null)
                     {
-                        await settings.onUserAsync!.Invoke(follower!);
+                        await settings.onUserAsync!.Invoke(follower!).ConfigureAwait(false);
                     }
 
                     settings.onUser?.Invoke(follower, logger, score);

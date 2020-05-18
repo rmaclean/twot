@@ -4,6 +4,8 @@ namespace twot
     using System.Threading.Tasks;
     using System.CommandLine;
     using System.CommandLine.Invocation;
+    using static ConsoleHelper;
+    using static System.ConsoleColor;
 
     class CleanCommand : BaseScoreCommand, ICommand
     {
@@ -37,16 +39,16 @@ namespace twot
 
         private async Task Execute(bool dryRun, double minScore, bool log)
         {
-            Console.WriteLine("Running clean 🧹");
+            Writeln(Cyan, "Running clean 🧹");
             if (dryRun)
             {
-                Console.WriteLine(" ⚠ Dry run mode");
+                Writeln(Yellow, " ⚠ Dry run mode");
             }
 
-            await Run(minScore, new ScoreSettings
+            await Run(minScore, log, new ScoreSettings
             {
                 mode = "Clean",
-                onComplete = total => Console.WriteLine($"Kicked {total} people who were following you."),
+                onComplete = total => Writeln(Green, $"Kicked {total} people who were following you."),
                 onUserAsync = async (user) =>
                 {
                     if (!dryRun)

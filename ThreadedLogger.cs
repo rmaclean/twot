@@ -10,13 +10,13 @@ namespace twot
 {
     class ThreadedLogger : IDisposable
     {
-        Queue<Action> queue = new Queue<Action>();
-        ManualResetEvent hasNewItems = new ManualResetEvent(false);
-        ManualResetEvent terminate = new ManualResetEvent(false);
-        ManualResetEvent waiting = new ManualResetEvent(false);
-        Thread? loggingThread;
-        FileStream? fileStream;
-        bool enabled;
+        readonly Queue<Action> queue = new Queue<Action>();
+        readonly ManualResetEvent hasNewItems = new ManualResetEvent(false);
+        readonly ManualResetEvent terminate = new ManualResetEvent(false);
+        readonly ManualResetEvent waiting = new ManualResetEvent(false);
+        readonly Thread? loggingThread;
+        readonly FileStream? fileStream;
+        readonly bool enabled;
         readonly byte[] newLine = Encoding.UTF8.GetBytes(Environment.NewLine);
 
         public ThreadedLogger(string filename, bool enabled)
@@ -38,7 +38,7 @@ namespace twot
                 waiting.Set();
                 int i = ManualResetEvent.WaitAny(new WaitHandle[] { hasNewItems, terminate });
                 // terminate was signaled
-                if (i == 1) return;
+                if (i == 1) { return; }
                 hasNewItems.Reset();
                 waiting.Reset();
 
@@ -59,7 +59,8 @@ namespace twot
         private void WriteLogMessage(string row)
         {
             fileStream!.Write(Encoding.UTF8.GetBytes(row));
-            if (!row.EndsWith(Environment.NewLine)) {
+            if (!row.EndsWith(Environment.NewLine))
+            {
                 fileStream.Write(newLine);
             }
         }

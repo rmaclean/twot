@@ -5,6 +5,8 @@ namespace twot
     using System.CommandLine.Invocation;
     using System.IO;
     using Newtonsoft.Json;
+    using static ConsoleHelper;
+    using static System.ConsoleColor;
 
     class InitCommand : twot.ICommand
     {
@@ -36,14 +38,14 @@ namespace twot
 
         private void InitSecretsConfig(string file)
         {
-            Console.WriteLine($"Init secrets config to {file}");
+            Writeln(Cyan, $"Init secrets config to {file}");
             var content = JsonConvert.SerializeObject(new SecretsConfig(), Formatting.Indented);
             File.WriteAllText(file, content);
         }
 
         private void InitScoreConfig(string file)
         {
-            Console.WriteLine($"Init score config to {file}");
+            Writeln(Cyan, $"Init score config to {file}");
             var content = new ScoreConfig().ToString();
             File.WriteAllText(file, content);
         }
