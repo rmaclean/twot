@@ -4,9 +4,10 @@
 
 Twot is a CLI tool to help with managing your Twitter experience by giving you advanced tools to manage who you follow, and who follows you.
 
-Please read the [wiki](/rmaclean/twot/wiki) for details on how to configure and details on all the options.
+Twot works with Linux, MacOS and Windows and the latest versions for all platforms are available in the [Releases](/rmaclean/twot/releases).
+Once you have downloaded Twot, please follow the [Setting up Twot](/rmaclean/twot/wiki/Setting-up-Twot) to correctly configure it.
 
-_Note:_ This is really beta at this stage. Log an [incident](https://github.com/rmaclean/twot/issues) if you find issues.
+_Note:_ Twot is beta, so use with care. Log an [incident](https://github.com/rmaclean/twot/issues) if you find issues.
 
 ## Commands
 
