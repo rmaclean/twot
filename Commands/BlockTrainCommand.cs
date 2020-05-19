@@ -62,6 +62,24 @@ namespace twot
             }
         }
 
+        private async Task BlockUser(IUser targetUser, bool dryRun, ProgressBar pbar, ThreadedLogger logger, bool mute)
+        {
+            if (!dryRun)
+            {
+                if (mute)
+                {
+                    Tweetinvi.Account.MuteUser(targetUser.UserIdentifier);
+                }
+                else
+                {
+                    await targetUser!.BlockAsync();
+                }
+            }
+
+            pbar.Tick($"{(mute ? "Muted" : "Blocked")} @{targetUser.ScreenName}");
+            logger.LogMessage(targetUser!.ScreenName);
+        }
+
         private async Task Execute(bool dryRun, string targetUsername, bool log, bool mute)
         {
             Writeln(Cyan, "Block Train 🚂");
@@ -81,23 +99,11 @@ namespace twot
                 logger.LogMessage($"# BlockTrain started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");
 
-                foreach (var targetUser in targets)
-                {
-                    if (!dryRun)
-                    {
-                        if (mute)
-                        {
-                            Tweetinvi.Account.MuteUser(targetUser.UserIdentifier);
-                        }
-                        else
-                        {
-                            await targetUser!.BlockAsync();
-                        }
-                    }
+                var actions = targets
+                        .Select(targetUser => BlockUser(targetUser, dryRun, pbar, logger, mute))
+                        .ToArray();
 
-                    pbar.Tick($"{(mute ? "Muted" : "Blocked")} @{targetUser.ScreenName}");
-                    logger.LogMessage(targetUser!.ScreenName);
-                }
+                Task.WaitAll(actions);
             }
 
             Writeln(Green, $"{(mute ? "Muted" : "Blocked")} a total of { targets.Count } people");

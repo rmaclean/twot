@@ -10,20 +10,31 @@ namespace twot
         string message = "";
         readonly char block = '█';
         readonly char background = '░';
-        double percentage;
+        int lastCursorPosition = 0;
+        int lastDraw = -1;
 
-        public ProgressBar(int steps): base(33)
+        public ProgressBar(int steps) : base(60)
         {
             this.steps = steps;
         }
 
         internal override void UpdateUI(object? state)
         {
+            var percentage = done / steps;
             var draw = (int)Math.Floor(percentage * Console.WindowWidth);
-            Write("".PadRight(Console.WindowWidth - 1, background));
-            Write("".PadRight(draw, block));
+            if (lastCursorPosition != cursorLine)
+            {
+                lastCursorPosition = cursorLine;
+                Write("".PadRight(Console.WindowWidth - 1, background));
+            }
 
-            Write("".PadRight(Console.WindowWidth -1, ' '), 1);
+            if (draw != lastDraw)
+            {
+                lastDraw = draw;
+                Write("".PadRight(draw, block));
+            }
+
+            Write("".PadRight(Console.WindowWidth - 1, ' '), 1);
             Write($"{percentage:P} {message}", 1);
 
             if (percentage >= 1)
@@ -35,7 +46,6 @@ namespace twot
         public void Tick(string message)
         {
             this.done++;
-            this.percentage = done / steps;
             this.message = message;
         }
     }
