@@ -43,6 +43,17 @@ namespace twot
             }
         }
 
+        private async Task InvokeAction(IUser follower, double score, ThreadedLogger logger, ProgressBar pbar, ScoreSettings settings)
+        {
+            if (settings.onUserAsync != null)
+            {
+                await settings.onUserAsync!.Invoke(follower);
+            }
+
+            settings.onUser?.Invoke(follower, logger, score);
+            pbar.Tick($"Processed @{follower.UserIdentifier.ScreenName}");
+        }
+
         internal async Task Run(double minScore, bool log, ScoreSettings settings)
         {
             var botsOrDead = await GetBotsOrDead(minScore);
@@ -52,16 +63,14 @@ namespace twot
                 logger.LogMessage($"# {settings.mode} started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");
 
-                foreach (var (follower, score) in botsOrDead)
-                {
-                    if (settings.onUserAsync != null)
+                var actions = botsOrDead
+                    .Select(item =>
                     {
-                        await settings.onUserAsync!.Invoke(follower!).ConfigureAwait(false);
-                    }
+                        var (follower, score) = item;
+                        return InvokeAction(follower, score, logger, pbar, settings);
+                    }).ToArray();
 
-                    settings.onUser?.Invoke(follower, logger, score);
-                    pbar.Tick($"Processed @{follower.UserIdentifier.ScreenName}");
-                }
+                Task.WaitAll(actions);
             }
 
             settings.onComplete!.Invoke(botsOrDead.Count);

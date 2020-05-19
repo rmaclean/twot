@@ -1,7 +1,7 @@
 namespace twot
 {
     using System;
-    class ConsoleHelper
+    static class ConsoleHelper
     {
         public static void Writeln(ConsoleColor colour, string message)
         {

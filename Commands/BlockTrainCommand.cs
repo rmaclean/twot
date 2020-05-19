@@ -58,6 +58,17 @@ namespace twot
             }
         }
 
+        private async Task BlockUser(IUser targetUser, bool dryRun, ProgressBar pbar, ThreadedLogger logger)
+        {
+            if (!dryRun)
+            {
+                await targetUser!.BlockAsync();
+            }
+
+            pbar.Tick($"Blocked @{targetUser.ScreenName}");
+            logger.LogMessage(targetUser!.ScreenName);
+        }
+
         private async Task Execute(bool dryRun, string targetUsername, bool log)
         {
             Writeln(Cyan, "Block Train 🚂");
@@ -77,16 +88,11 @@ namespace twot
                 logger.LogMessage($"# BlockTrain started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");
 
-                foreach (var targetUser in targets)
-                {
-                    if (!dryRun)
-                    {
-                        await targetUser!.BlockAsync();
-                    }
+                var actions = targets
+                        .Select(targetUser => BlockUser(targetUser, dryRun, pbar, logger))
+                        .ToArray();
 
-                    pbar.Tick($"Blocked @{targetUser.ScreenName}");
-                    logger.LogMessage(targetUser!.ScreenName);
-                }
+                Task.WaitAll(actions);
             }
 
             Writeln(Green, $"Blocked a total of { targets.Count } people");

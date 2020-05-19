@@ -1,11 +1,12 @@
+using System.Runtime.InteropServices;
 namespace twot
 {
     using System;
     using System.Threading;
 
-    abstract class ProgressMeter: IDisposable
+    abstract class ProgressMeter : IDisposable
     {
-        readonly int cursorLine;
+        protected int cursorLine;
         readonly ConsoleColor originalColour;
         readonly bool originalCursorVisible;
         readonly Timer? timer;
@@ -13,7 +14,8 @@ namespace twot
 
         protected ProgressMeter(int updateSpeedMs)
         {
-            if (Console.IsOutputRedirected) {
+            if (Console.IsOutputRedirected)
+            {
                 return;
             }
 
@@ -24,11 +26,14 @@ namespace twot
                 cursorLine -= 2;
             }
 
-            originalColour = Console.ForegroundColor;
-            originalCursorVisible = Console.CursorVisible;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                originalCursorVisible = Console.CursorVisible;
+                Console.CursorVisible = false;
+            }
 
+            originalColour = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.CursorVisible = false;
 
             doneEvent = new AutoResetEvent(false);
             timer = new Timer(UpdateUI, doneEvent, 0, updateSpeedMs);
@@ -37,8 +42,10 @@ namespace twot
         internal void Write(string message, int offset = 0)
         {
             var target = cursorLine + offset;
-            if (target >= Console.BufferHeight) {
+            if (target >= Console.BufferHeight)
+            {
                 target = Console.BufferHeight - 1 - Math.Min(offset - 1, 1 - offset);
+                cursorLine = target - offset;
             }
 
             Console.CursorTop = target;
@@ -58,10 +65,16 @@ namespace twot
                 return;
             }
 
+            doneEvent?.WaitOne();
+            doneEvent?.Dispose();
             timer?.Dispose();
             Console.WriteLine();
             Console.ForegroundColor = originalColour;
-            Console.CursorVisible = originalCursorVisible;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Console.CursorVisible = originalCursorVisible;
+            }
 
             disposed = true;
 
