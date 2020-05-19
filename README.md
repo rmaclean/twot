@@ -69,8 +69,10 @@ Init helps setup the environment. You can create a `secret.json` by passing in `
 
 This will allow you to block a user, and all their followers. In addtion to the common parameters, you just need to specify the targets username without the @, using `--target` or `-t`.
 
+If you would rather mute accounts, instead of blocking, you can use the `--mute` parameter.
+
 #### Synopsis
-<pre><strong>twot BlockTrain</strong> [--dryrun] [--log | l] [--target | -t &lt;username&gt;]]</pre>
+<pre><strong>twot BlockTrain</strong> [--dryrun] [--log | -l] [--target | -t &lt;username&gt;]] [--mute | -m]</pre>
 
 #### BlockTrain and people you follow
 
@@ -80,8 +82,10 @@ People who you follow will not be blocked in the block train.
 
 This will allow you to "force unfollow", block and unblock a person which causes them to unfollow you, your followers based on a score. The goal is to get rid of bots and abandoned accounts. You do not need to provide anything beyond the common parameters, however there is a score parameter, `--score`, to change how aggressive you want to be.
 
+You can choose to
+
 #### Synopsis
-<pre><strong>twot Clean</strong> [--dryrun] [--log | l] [--score | -s &lt;min score&gt;]</pre>
+<pre><strong>twot Clean</strong> [--dryrun] [--log | -l] [--score | -s &lt;min score&gt;]</pre>
 
 ### Score
 
@@ -94,8 +98,10 @@ This runs the same logic as *Clean* but does not make any actions and anyone who
 
 The unblock command will unblock a single person (with the *-t* parameter), a group of people from a file, such as the log file produced with *BlockTrain* and *Clean* (with the *-f* parameter) or everyone you have blocked (with the *--all* parameter).
 
+If you supply `--unmute` then it will unmute a person, a list of people or everyone you have muted already using the same parameters as with unblock.
+
 #### Synopsis
-<pre><strong>twot unblock</strong> [--dryrun] [--target | -t &lt;username&gt;] [--all] [--file | -f &lt;file&gt;]</pre>
+<pre><strong>twot unblock</strong> [--dryrun] [--target | -t &lt;username&gt;] [--all] [--file | -f &lt;file&gt;] [--unmute] [--log | -l]</pre>
 
 
 ## Cleaning, blocking and people you follow

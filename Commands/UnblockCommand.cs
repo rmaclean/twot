@@ -50,6 +50,23 @@ namespace twot
             rootCommand.Add(cmd);
         }
 
+        private async Task ProcessUser(bool dryRun, bool unmute, IUser target, ProgressBar pbar, ThreadedLogger logger)
+        {
+            if (!dryRun)
+            {
+                if (unmute)
+                {
+                    Account.UnMuteUser(target.UserIdentifier);
+                }
+                else
+                {
+                    await target.UnBlockAsync();
+                }
+            }
+
+            pbar.Tick($"{(unmute ? "Unmuted" : "Unblocked")} @{target.ScreenName}");
+            logger.LogMessage(target!.ScreenName);
+        }
 
         private async Task Execute(bool dryRun, string targetUsername, bool all, string file, bool log, bool unmute)
         {
@@ -108,23 +125,11 @@ namespace twot
                 logger.LogMessage($"# Unblock started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");
 
-                foreach (var target in accountsToUnblock.AsParallel())
-                {
-                    if (!dryRun)
-                    {
-                        if (unmute)
-                        {
-                            Account.UnMuteUser(target.UserIdentifier);
-                        }
-                        else
-                        {
-                            await target.UnBlockAsync();
-                        }
-                    }
+                var actions = accountsToUnblock
+                    .Select(target => ProcessUser(dryRun, unmute, target, pbar, logger))
+                    .ToArray();
 
-                    pbar.Tick($"{(unmute ? "Unmuted" : "Unblocked")} @{target.ScreenName}");
-                    logger.LogMessage(target!.ScreenName);
-                }
+                Task.WaitAll(actions);
             }
 
             Writeln(Green, $"{(unmute ? "Unmuted" : "Unblocked")} a total of {accountsToUnblock.Count} people");
