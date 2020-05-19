@@ -90,7 +90,7 @@ namespace twot
 
             Console.WriteLine();
 
-            Writeln(DarkBlue, "Loading people to block, this may take some time...");
+            Writeln(DarkBlue, $"Loading people to {(mute ? "mute" : "block")}, this may take some time...");
             var targets = await GetTargets(targetUsername).ConfigureAwait(false);
 
             using (var logger = new ThreadedLogger("BlockTrain.log", log))
