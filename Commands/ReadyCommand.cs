@@ -1,6 +1,5 @@
 namespace twot
 {
-    using System;
     using Tweetinvi;
     using System.CommandLine;
     using System.CommandLine.Invocation;

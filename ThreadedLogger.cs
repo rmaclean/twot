@@ -1,13 +1,13 @@
-using System.Text;
-using System.IO;
 // originally from https://stackoverflow.com/a/1187568/53236
-
-using System;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace twot
 {
+    using System.Text;
+    using System.IO;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading;
+
     class ThreadedLogger : IDisposable
     {
         readonly Queue<Action> queue = new Queue<Action>();

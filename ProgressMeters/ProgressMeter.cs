@@ -1,8 +1,8 @@
-using System.Runtime.InteropServices;
 namespace twot
 {
     using System;
     using System.Threading;
+    using System.Runtime.InteropServices;
 
     abstract class ProgressMeter : IDisposable
     {

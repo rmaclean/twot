@@ -1,7 +1,6 @@
 namespace twot
 {
     using System;
-    using System.Threading;
 
     class ProgressBar : ProgressMeter
     {
