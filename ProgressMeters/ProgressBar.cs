@@ -10,7 +10,7 @@ namespace twot
         string message = "";
         readonly char block = '█';
         readonly char background = '░';
-        int lastCursorPosition = 0;
+        int lastCursorPosition;
         int lastDraw = -1;
 
         public ProgressBar(int steps) : base(60)

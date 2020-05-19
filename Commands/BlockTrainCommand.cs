@@ -34,7 +34,11 @@ namespace twot
             logOption.AddAlias("-l");
             cmd.Add(logOption);
 
-            cmd.Handler = CommandHandler.Create<bool, string, bool>(Execute);
+            var muteOption = new Option<bool>("--mute", "Rather than blocking, this command will mute the targets");
+            muteOption.AddAlias("-m");
+            cmd.Add(muteOption);
+
+            cmd.Handler = CommandHandler.Create<bool, string, bool, bool>(Execute);
             rootCommand.Add(cmd);
         }
 
@@ -58,18 +62,25 @@ namespace twot
             }
         }
 
-        private async Task BlockUser(IUser targetUser, bool dryRun, ProgressBar pbar, ThreadedLogger logger)
+        private async Task BlockUser(IUser targetUser, bool dryRun, ProgressBar pbar, ThreadedLogger logger, bool mute)
         {
             if (!dryRun)
             {
-                await targetUser!.BlockAsync();
+                if (mute)
+                {
+                    Tweetinvi.Account.MuteUser(targetUser.UserIdentifier);
+                }
+                else
+                {
+                    await targetUser!.BlockAsync();
+                }
             }
 
-            pbar.Tick($"Blocked @{targetUser.ScreenName}");
+            pbar.Tick($"{(mute ? "Muted" : "Blocked")} @{targetUser.ScreenName}");
             logger.LogMessage(targetUser!.ScreenName);
         }
 
-        private async Task Execute(bool dryRun, string targetUsername, bool log)
+        private async Task Execute(bool dryRun, string targetUsername, bool log, bool mute)
         {
             Writeln(Cyan, "Block Train 🚂");
             if (dryRun)
@@ -79,7 +90,7 @@ namespace twot
 
             Console.WriteLine();
 
-            Writeln(DarkBlue, "Loading people to block, this may take some time...");
+            Writeln(DarkBlue, $"Loading people to {(mute ? "mute" : "block")}, this may take some time...");
             var targets = await GetTargets(targetUsername).ConfigureAwait(false);
 
             using (var logger = new ThreadedLogger("BlockTrain.log", log))
@@ -89,13 +100,13 @@ namespace twot
                     $"{DateTime.Now.ToLongTimeString()}");
 
                 var actions = targets
-                        .Select(targetUser => BlockUser(targetUser, dryRun, pbar, logger))
+                        .Select(targetUser => BlockUser(targetUser, dryRun, pbar, logger, mute))
                         .ToArray();
 
                 Task.WaitAll(actions);
             }
 
-            Writeln(Green, $"Blocked a total of { targets.Count } people");
+            Writeln(Green, $"{(mute ? "Muted" : "Blocked")} a total of { targets.Count } people");
         }
     }
 }

@@ -43,12 +43,32 @@ namespace twot
             logOption.AddAlias("-l");
             cmd.Add(logOption);
 
-            cmd.Handler = CommandHandler.Create<bool, string, bool, string, bool>(Execute);
+            var unmuteOption = new Option<bool>("--unmute", "Rather than unblocking, this command will unmute the targets");
+            cmd.Add(unmuteOption);
+
+            cmd.Handler = CommandHandler.Create<bool, string, bool, string, bool, bool>(Execute);
             rootCommand.Add(cmd);
         }
 
+        private async Task ProcessUser(bool dryRun, bool unmute, IUser target, ProgressBar pbar, ThreadedLogger logger)
+        {
+            if (!dryRun)
+            {
+                if (unmute)
+                {
+                    Account.UnMuteUser(target.UserIdentifier);
+                }
+                else
+                {
+                    await target.UnBlockAsync();
+                }
+            }
 
-        private async Task Execute(bool dryRun, string targetUsername, bool all, string file, bool log)
+            pbar.Tick($"{(unmute ? "Unmuted" : "Unblocked")} @{target.ScreenName}");
+            logger.LogMessage(target!.ScreenName);
+        }
+
+        private async Task Execute(bool dryRun, string targetUsername, bool all, string file, bool log, bool unmute)
         {
             Writeln(Cyan, "Unblock 🔁");
             if (dryRun)
@@ -66,7 +86,15 @@ namespace twot
             {
                 using (var spinner = new Spinner())
                 {
-                    accountsToUnblock = me.GetBlockedUsers().ToList();
+                    if (unmute)
+                    {
+                        accountsToUnblock = Account.GetMutedUsers(Int32.MaxValue).ToList();
+                    }
+                    else
+                    {
+                        accountsToUnblock = me.GetBlockedUsers().ToList();
+                    }
+
                     spinner.Done();
                 }
             }
@@ -97,19 +125,14 @@ namespace twot
                 logger.LogMessage($"# Unblock started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");
 
-                foreach (var target in accountsToUnblock.AsParallel())
-                {
-                    if (!dryRun)
-                    {
-                        await target.UnBlockAsync();
-                    }
+                var actions = accountsToUnblock
+                    .Select(target => ProcessUser(dryRun, unmute, target, pbar, logger))
+                    .ToArray();
 
-                    pbar.Tick($"Unblocked @{target.ScreenName}");
-                    logger.LogMessage(target!.ScreenName);
-                }
+                Task.WaitAll(actions);
             }
 
-            Writeln(Green, $"Unblocked a total of {accountsToUnblock.Count} people");
+            Writeln(Green, $"{(unmute ? "Unmuted" : "Unblocked")} a total of {accountsToUnblock.Count} people");
         }
     }
 }
