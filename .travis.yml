@@ -19,6 +19,11 @@ before_deploy:
 # OSX x64
 - dotnet publish -c Release -r osx-x64 /p:PublishSingleFile=true
 - zip -j Release/osxx64.zip bin/Release/netcoreapp3.1/osx-x64/publish/*
+# Git tag config
+- git config --local user.name "Robert MacLean"
+- git config --local user.email "robert@sadev.co.za"
+- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+- git tag $TRAVIS_TAG
 
 deploy:
   provider: releases
@@ -28,6 +33,7 @@ deploy:
   file: Release/*
   on:
     repo: rmaclean/twot
+  skip_cleanup: true
   prerelease: true
 
 
