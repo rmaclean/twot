@@ -28,11 +28,6 @@
         {
             EnableUTFConsole();
             var configResult = Config.Load();
-            if (!configResult.Success)
-            {
-                return -1;
-            }
-
             var config = configResult.Config;
             RateLimit.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
 
