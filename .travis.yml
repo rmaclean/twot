@@ -6,6 +6,7 @@ script:
 - dotnet build
 
 before_deploy:
+- mkdir Release
 # Windows x64
 - dotnet publish -c Release -r win-x64 /p:PublishSingleFile=true
 - zip -j Release/win64.zip bin/Release/netcoreapp3.1/win-x64/publish/*
@@ -27,7 +28,6 @@ deploy:
   file: Release/*
   on:
     repo: rmaclean/twot
-  skip_cleanup: 'true'
   prerelease: true
 
 
