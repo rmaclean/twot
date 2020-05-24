@@ -2,7 +2,7 @@ namespace twot
 {
     using System.CommandLine;
 
-    interface ICommand
+    internal interface ICommand
     {
         void AddCommand(Command rootCommand);
     }

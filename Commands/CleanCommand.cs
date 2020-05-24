@@ -1,13 +1,17 @@
 namespace twot
 {
     using System;
-    using System.Threading.Tasks;
     using System.CommandLine;
     using System.CommandLine.Invocation;
-    using static ConsoleHelper;
-    using static System.ConsoleColor;
+    using System.Threading.Tasks;
 
-    class CleanCommand : BaseScoreCommand, ICommand
+    using static System.ConsoleColor;
+    using static CommandHelpers;
+    using static ConsoleHelper;
+
+#pragma warning disable CA1812
+    internal class CleanCommand : BaseScoreCommand, ICommand
+#pragma warning restore CA1812
     {
         public void AddCommand(Command rootCommand)
         {
@@ -21,8 +25,8 @@ namespace twot
             var minScoreOption = new Option<double>(
                 "--score",
                 () => 0.85,
-                "Sets the score for min kicking. Defaults to 0.85"
-            );
+                "Sets the score for min kicking. Defaults to 0.85");
+
             minScoreOption.Name = "minscore";
             minScoreOption.AddAlias("-s");
             cmd.Add(minScoreOption);
@@ -33,16 +37,15 @@ namespace twot
             logOption.AddAlias("-l");
             cmd.Add(logOption);
 
-            cmd.Handler = CommandHandler.Create<bool, double, bool>(Execute);
+            cmd.Handler = CommandHandler.Create<bool, double, bool>(this.Execute);
             rootCommand.Add(cmd);
         }
 
-        private async Task Execute(bool dryRun, double minScore, bool log)
+        private async Task<int> Execute(bool dryRun, double minScore, bool log)
         {
-            Writeln(Cyan, "Running clean 🧹");
-            if (dryRun)
+            if (!CommandHeader("Running clean 🧹", dryRun))
             {
-                Writeln(Yellow, " ⚠ Dry run mode");
+                return -1;
             }
 
             await Run(minScore, log, new ScoreSettings
@@ -56,7 +59,6 @@ namespace twot
                         await user!.BlockAsync();
                         await user!.UnBlockAsync();
                     }
-
                 },
                 onUser = (user, logger, score) => logger.LogMessage(user!.UserIdentifier.ScreenName),
                 beforeRun = logger =>
@@ -67,8 +69,10 @@ namespace twot
                     {
                         logger.LogMessage("# DryRun Mode");
                     }
-                }
+                },
             });
+
+            return 0;
         }
     }
 }

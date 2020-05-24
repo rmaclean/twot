@@ -1,0 +1,14 @@
+<RuleSet Name="Rules for Hello World project" ToolsVersion="10.0">
+  <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
+    <Rule Id="SA1600" Action="None" /> <!-- Element documentation -->
+    <Rule Id="CA2007" Action="None" /> <!-- Consider calling ConfigureAwait on the awaited task -->
+    <Rule Id="CA1303" Action="None" /> <!-- passes a literal string as parameter 'value' of a call -->
+    <Rule Id="SA1633" Action="None" /> <!-- The file header is missing or not located at the top of the file. -->
+    <Rule Id="SA1402" Action="None" /> <!-- File may only contain a single type -->
+    <Rule Id="SA1649" Action="None" /> <!-- File name should match first type name -->
+    <Rule Id="SA1300" Action="None" /> <!-- Element 'twot' should begin with an uppercase letter -->
+    <Rule Id="SA1118" Action="None" /> <!-- The parameter spans multiple lines -->
+    <Rule Id="CS1591" Action="None" /> <!-- Missing XML comment for publicly visible type or member -->
+    <Rule Id="CA1052" Action="None" /> <!-- Type 'Program' is a static holder type but is neither static nor NotInheritable -->
+  </Rules>
+</RuleSet>

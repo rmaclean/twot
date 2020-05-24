@@ -1,18 +1,22 @@
 namespace twot
 {
-    using System.Linq;
     using System;
     using System.Collections.Generic;
     using System.CommandLine;
     using System.CommandLine.Invocation;
+    using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using Tweetinvi;
     using Tweetinvi.Models;
-    using System.IO;
-    using static ConsoleHelper;
-    using static System.ConsoleColor;
 
-    class UnblockCommand : ICommand
+    using static System.ConsoleColor;
+    using static CommandHelpers;
+    using static ConsoleHelper;
+
+#pragma warning disable CA1812
+    internal class UnblockCommand : ICommand
+#pragma warning restore CA1812
     {
         public void AddCommand(Command rootCommand)
         {
@@ -46,11 +50,11 @@ namespace twot
             var unmuteOption = new Option<bool>("--unmute", "Rather than unblocking, this command will unmute the targets");
             cmd.Add(unmuteOption);
 
-            cmd.Handler = CommandHandler.Create<bool, string, bool, string, bool, bool>(Execute);
+            cmd.Handler = CommandHandler.Create<bool, string, bool, string, bool, bool>(this.Execute);
             rootCommand.Add(cmd);
         }
 
-        private async Task ProcessUser(bool dryRun, bool unmute, IUser target, ProgressBar pbar, ThreadedLogger logger)
+        private static async Task ProcessUser(bool dryRun, bool unmute, IUser target, ProgressBar pbar, ThreadedLogger logger)
         {
             if (!dryRun)
             {
@@ -68,15 +72,12 @@ namespace twot
             logger.LogMessage(target!.ScreenName);
         }
 
-        private async Task Execute(bool dryRun, string targetUsername, bool all, string file, bool log, bool unmute)
+        private async Task<int> Execute(bool dryRun, string targetUsername, bool all, string file, bool log, bool unmute)
         {
-            Writeln(Cyan, "Unblock 🔁");
-            if (dryRun)
+            if (!CommandHeader("Unblock 🔁", dryRun))
             {
-                Writeln(Yellow, " ⚠ Dry run mode");
+                return -1;
             }
-
-            Console.WriteLine();
 
             var me = User.GetAuthenticatedUser();
 
@@ -88,7 +89,7 @@ namespace twot
                 {
                     if (unmute)
                     {
-                        accountsToUnblock = Account.GetMutedUsers(Int32.MaxValue).ToList();
+                        accountsToUnblock = Account.GetMutedUsers(int.MaxValue).ToList();
                     }
                     else
                     {
@@ -110,12 +111,10 @@ namespace twot
                 {
                     accountsToUnblock.AddRange(
                         (await File.ReadAllLinesAsync(file))
-                        .AsParallel()
-                        .Where(line => !line.StartsWith("#"))
+                        .Where(line => !line.StartsWith("#", StringComparison.InvariantCultureIgnoreCase))
                         .Select(line => line.Split(',', 1)[0].Trim())
-                        .Where(line => !line.Contains(' '))
-                        .Select(line => User.GetUserFromScreenName(line))
-                    );
+                        .Where(line => !line.Contains(' ', StringComparison.InvariantCultureIgnoreCase))
+                        .Select(line => User.GetUserFromScreenName(line)));
                 }
             }
 
@@ -133,6 +132,8 @@ namespace twot
             }
 
             Writeln(Green, $"{(unmute ? "Unmuted" : "Unblocked")} a total of {accountsToUnblock.Count} people");
+
+            return 0;
         }
     }
 }

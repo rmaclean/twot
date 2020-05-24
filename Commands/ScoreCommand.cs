@@ -1,13 +1,15 @@
 namespace twot
 {
     using System;
-    using System.Threading.Tasks;
     using System.CommandLine;
     using System.CommandLine.Invocation;
-    using static ConsoleHelper;
-    using static System.ConsoleColor;
+    using System.Threading.Tasks;
 
-    class ScoreCommand : BaseScoreCommand, ICommand
+    using static CommandHelpers;
+
+#pragma warning disable CA1812
+    internal class ScoreCommand : BaseScoreCommand, ICommand
+#pragma warning restore CA1812
     {
         public void AddCommand(Command rootCommand)
         {
@@ -20,19 +22,23 @@ namespace twot
             var minScoreOption = new Option<double>(
                 "--score",
                 () => 0.85,
-                "Sets the score for min kicking. Defaults to 0.85"
-            );
+                "Sets the score for min kicking. Defaults to 0.85");
+
             minScoreOption.Name = "minscore";
             minScoreOption.AddAlias("-s");
             cmd.Add(minScoreOption);
 
-            cmd.Handler = CommandHandler.Create<double>(Execute);
+            cmd.Handler = CommandHandler.Create<double>(this.Execute);
             rootCommand.Add(cmd);
         }
 
-        private async Task Execute(double minScore)
+        private async Task<int> Execute(double minScore)
         {
-            Writeln(Cyan, "Running Score 🥅");
+            if (!CommandHeader("Running Score 🥅"))
+            {
+                return -1;
+            }
+
             await Run(minScore, true, new ScoreSettings
             {
                 mode = "Score",
@@ -42,8 +48,10 @@ namespace twot
                 {
                     logger.LogMessage($"# Score started {DateTime.Now.ToLongDateString()} " +
                                         $"{DateTime.Now.ToLongTimeString()}");
-                }
+                },
             });
+
+            return 0;
         }
     }
 }

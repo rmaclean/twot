@@ -1,40 +1,46 @@
 namespace twot
 {
-    using System.Linq;
     using System;
-    using System.Threading.Tasks;
-    using Tweetinvi.Models;
-    using Tweetinvi;
     using System.Collections.Generic;
-    using static ConsoleHelper;
-    using static System.ConsoleColor;
+    using System.Linq;
+    using System.Threading.Tasks;
 
-    class ScoreSettings
+    using Tweetinvi;
+    using Tweetinvi.Models;
+
+    using static System.ConsoleColor;
+    using static ConsoleHelper;
+
+    internal class ScoreSettings
     {
-        public string mode { get; set; } = "";
+        public string mode { get; set; } = string.Empty;
+
         public Action<int>? onComplete { get; set; }
+
         public Func<IUser?, Task>? onUserAsync { get; set; }
+
         public Action<IUser?, ThreadedLogger, double>? onUser { get; set; }
+
         public Action<ThreadedLogger>? beforeRun { get; set; }
     }
 
-    class BaseScoreCommand
+    internal class BaseScoreCommand
     {
-        internal async Task<List<(IUser, double)>> GetBotsOrDead(double minScore)
+        internal static async Task<List<(IUser, double)>> GetBotsOrDead(double minScore)
         {
             Writeln(DarkBlue, "Loading people, this may take some time...");
             using (var spinner = new Spinner())
             {
                 var me = User.GetAuthenticatedUser();
 
-                var friends = await me.GetFriendIdsAsync(Int32.MaxValue);
-                var followers = await me.GetFollowersAsync(Int32.MaxValue);
+                var friends = await me.GetFriendIdsAsync(int.MaxValue);
+                var followers = await me.GetFollowersAsync(int.MaxValue);
 
                 var scoringConfig = new ScoreConfig();
 
                 var result = followers
                     .Where(_ => !friends.Contains(_.Id))
-                    .Select(Follower => (Follower, Score: Score(Follower, scoringConfig)))
+                    .Select(follower => (Follower: follower, Score: Score(follower, scoringConfig)))
                     .Where(_ => _.Score > minScore)
                     .OrderBy(_ => _.Follower.Name);
 
@@ -43,18 +49,7 @@ namespace twot
             }
         }
 
-        private async Task InvokeAction(IUser follower, double score, ThreadedLogger logger, ProgressBar pbar, ScoreSettings settings)
-        {
-            if (settings.onUserAsync != null)
-            {
-                await settings.onUserAsync!.Invoke(follower);
-            }
-
-            settings.onUser?.Invoke(follower, logger, score);
-            pbar.Tick($"Processed @{follower.UserIdentifier.ScreenName}");
-        }
-
-        internal async Task Run(double minScore, bool log, ScoreSettings settings)
+        internal static async Task Run(double minScore, bool log, ScoreSettings settings)
         {
             var botsOrDead = await GetBotsOrDead(minScore);
             using (var logger = new ThreadedLogger($"{settings.mode}.log", log))
@@ -76,7 +71,18 @@ namespace twot
             settings.onComplete!.Invoke(botsOrDead.Count);
         }
 
-        double Score(IUser follower, ScoreConfig scoring)
+        private static async Task InvokeAction(IUser follower, double score, ThreadedLogger logger, ProgressBar pbar, ScoreSettings settings)
+        {
+            if (settings.onUserAsync != null)
+            {
+                await settings.onUserAsync!.Invoke(follower);
+            }
+
+            settings.onUser?.Invoke(follower, logger, score);
+            pbar.Tick($"Processed @{follower.UserIdentifier.ScreenName}");
+        }
+
+        private static double Score(IUser follower, ScoreConfig scoring)
         {
             var result = 0.0;
             if (scoring.DefaultProfileImage.Enabled && follower.DefaultProfileImage == scoring.DefaultProfileImage.Value)

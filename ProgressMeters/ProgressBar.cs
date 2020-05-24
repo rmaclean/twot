@@ -1,51 +1,53 @@
 namespace twot
 {
     using System;
+    using System.Threading;
 
-    class ProgressBar : ProgressMeter
+    internal class ProgressBar : ProgressMeter
     {
-        readonly int steps;
-        double done;
-        string message = "";
-        readonly char block = '█';
-        readonly char background = '░';
-        int lastCursorPosition;
-        int lastDraw = -1;
+        private readonly int steps;
+        private readonly char block = '█';
+        private readonly char background = '░';
+        private int done;
+        private string message = string.Empty;
+        private int lastCursorPosition;
+        private int lastDraw = -1;
 
-        public ProgressBar(int steps) : base(60)
+        public ProgressBar(int steps)
+            : base(60)
         {
             this.steps = steps;
         }
 
+        public void Tick(string message)
+        {
+            Interlocked.Increment(ref this.done);
+            this.message = message;
+        }
+
         internal override void UpdateUI(object? state)
         {
-            var percentage = done / steps;
+            var percentage = (double)this.done / this.steps;
             var draw = (int)Math.Floor(percentage * Console.WindowWidth);
-            if (lastCursorPosition != cursorLine)
+            if (this.lastCursorPosition != this.cursorLine)
             {
-                lastCursorPosition = cursorLine;
-                Write("".PadRight(Console.WindowWidth - 1, background));
+                this.lastCursorPosition = this.cursorLine;
+                this.Write(string.Empty.PadRight(Console.WindowWidth - 1, this.background));
             }
 
-            if (draw != lastDraw)
+            if (draw != this.lastDraw)
             {
-                lastDraw = draw;
-                Write("".PadRight(draw, block));
+                this.lastDraw = draw;
+                this.Write(string.Empty.PadRight(draw, this.block));
             }
 
-            Write("".PadRight(Console.WindowWidth - 1, ' '), 1);
-            Write($"{percentage:P} {message}", 1);
+            this.Write(string.Empty.PadRight(Console.WindowWidth - 1, ' '), 1);
+            this.Write($"{percentage:P} {this.message}", 1);
 
             if (percentage >= 1)
             {
-                doneEvent?.Set();
+                this.DoneEvent?.Set();
             }
-        }
-
-        public void Tick(string message)
-        {
-            this.done++;
-            this.message = message;
         }
     }
 }

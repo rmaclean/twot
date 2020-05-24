@@ -1,14 +1,19 @@
 namespace twot
 {
-    using Tweetinvi;
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using System.IO;
     using System.Linq;
-    using static ConsoleHelper;
-    using static System.ConsoleColor;
 
-    class ReadyCommand : ICommand
+    using Tweetinvi;
+
+    using static System.ConsoleColor;
+    using static CommandHelpers;
+    using static ConsoleHelper;
+
+#pragma warning disable CA1812
+    internal class ReadyCommand : ICommand
+#pragma warning restore CA1812
     {
         public void AddCommand(Command rootCommand)
         {
@@ -16,13 +21,16 @@ namespace twot
             cmd.AddAlias("ready");
             cmd.AddAlias("r");
 
-            cmd.Handler = CommandHandler.Create(Execute);
+            cmd.Handler = CommandHandler.Create(this.Execute);
             rootCommand.Add(cmd);
         }
 
-        private void Execute()
+        private int Execute()
         {
-            Writeln(Cyan, "Ready ❔");
+            if (!CommandHeader("Ready ❔"))
+            {
+                return -1;
+            }
 
             var me = User.GetAuthenticatedUser();
             if (me == null)
@@ -30,7 +38,7 @@ namespace twot
                 Writeln(Red, "🛑 Config incorrect");
                 var latestException = ExceptionHandler.GetLastException();
                 Writeln(DarkRed, $"  {latestException.TwitterDescription}");
-                return;
+                return -1;
             }
 
             Writeln(Green, $"✅ Config correct for @{me.ScreenName}");
@@ -40,18 +48,25 @@ namespace twot
             {
                 try
                 {
+                    #pragma warning disable CA1806
                     new ScoreConfig();
+                    #pragma warning restore CA1806
                     Writeln(Green, $"✅ Score config correct for Clean command");
                 }
+            #pragma warning disable CA1031
                 catch
+            #pragma warning restore CA1031
                 {
                     Writeln(Red, "🛑 Score config incorrect");
+                    return -1;
                 }
             }
             else
             {
                 Writeln(DarkGreen, $"✅ No score.json found");
             }
+
+            return 0;
         }
     }
 }

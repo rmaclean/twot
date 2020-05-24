@@ -1,17 +1,22 @@
 namespace twot
 {
-    using System.Linq;
     using System;
-    using System.Threading.Tasks;
-    using Tweetinvi;
+    using System.Collections.Generic;
     using System.CommandLine;
     using System.CommandLine.Invocation;
-    using Tweetinvi.Models;
-    using System.Collections.Generic;
-    using static ConsoleHelper;
-    using static System.ConsoleColor;
+    using System.Linq;
+    using System.Threading.Tasks;
 
-    class BlockTrain : ICommand
+    using Tweetinvi;
+    using Tweetinvi.Models;
+
+    using static System.ConsoleColor;
+    using static CommandHelpers;
+    using static ConsoleHelper;
+
+#pragma warning disable CA1812
+    internal class BlockTrain : ICommand
+#pragma warning restore CA1812
     {
         public void AddCommand(Command rootCommand)
         {
@@ -38,22 +43,22 @@ namespace twot
             muteOption.AddAlias("-m");
             cmd.Add(muteOption);
 
-            cmd.Handler = CommandHandler.Create<bool, string, bool, bool>(Execute);
+            cmd.Handler = CommandHandler.Create<bool, string, bool, bool>(this.Execute);
             rootCommand.Add(cmd);
         }
 
-        private async Task<List<IUser>> GetTargets(string targetUsername)
+        private static async Task<List<IUser>> GetTargets(string targetUsername)
         {
             using (var spinner = new Spinner())
             {
                 var result = new List<IUser>();
                 var me = User.GetAuthenticatedUser();
-                var friends = await me.GetFriendsAsync(Int32.MaxValue);
+                var friends = await me.GetFriendsAsync(int.MaxValue);
 
                 var target = User.GetUserFromScreenName(targetUsername);
                 result.Add(target);
 
-                var enermies = await target.GetFollowersAsync(Int32.MaxValue);
+                var enermies = await target.GetFollowersAsync(int.MaxValue);
 
                 var targetsForBlock = enermies.Where(enermy => !friends.Contains(enermy));
                 result.AddRange(targetsForBlock);
@@ -62,7 +67,7 @@ namespace twot
             }
         }
 
-        private async Task BlockUser(IUser targetUser, bool dryRun, ProgressBar pbar, ThreadedLogger logger, bool mute)
+        private static async Task BlockUser(IUser targetUser, bool dryRun, ProgressBar pbar, ThreadedLogger logger, bool mute)
         {
             if (!dryRun)
             {
@@ -80,15 +85,12 @@ namespace twot
             logger.LogMessage(targetUser!.ScreenName);
         }
 
-        private async Task Execute(bool dryRun, string targetUsername, bool log, bool mute)
+        private async Task<int> Execute(bool dryRun, string targetUsername, bool log, bool mute)
         {
-            Writeln(Cyan, "Block Train 🚂");
-            if (dryRun)
+            if (!CommandHeader("Block Train 🚂", dryRun))
             {
-                Writeln(Yellow, " ⚠ Dry run mode");
+                return -1;
             }
-
-            Console.WriteLine();
 
             Writeln(DarkBlue, $"Loading people to {(mute ? "mute" : "block")}, this may take some time...");
             var targets = await GetTargets(targetUsername).ConfigureAwait(false);
@@ -106,7 +108,8 @@ namespace twot
                 Task.WaitAll(actions);
             }
 
-            Writeln(Green, $"{(mute ? "Muted" : "Blocked")} a total of { targets.Count } people");
+            Writeln(Green, $"{(mute ? "Muted" : "Blocked")} a total of {targets.Count} people");
+            return 0;
         }
     }
 }

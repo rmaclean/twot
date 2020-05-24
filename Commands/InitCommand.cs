@@ -3,11 +3,15 @@ namespace twot
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using System.IO;
-    using Newtonsoft.Json;
-    using static ConsoleHelper;
-    using static System.ConsoleColor;
 
-    class InitCommand : twot.ICommand
+    using Newtonsoft.Json;
+
+    using static System.ConsoleColor;
+    using static ConsoleHelper;
+
+#pragma warning disable CA1812
+    internal class InitCommand : twot.ICommand
+#pragma warning restore CA1812
     {
         public void AddCommand(Command rootCommand)
         {
@@ -17,20 +21,19 @@ namespace twot
 
             var scoreInit = new Command("Score", "Initialises a score file for use with the Clean command.");
             scoreInit.AddAlias("score");
-            scoreInit.AddOption(new Option<string>("--file", () => "score.json", "This allows you to specify where you output " +
-                "the scoring config to. Defaults to score.json"));
-            scoreInit.Handler = CommandHandler.Create<string>(InitScoreConfig);
+            scoreInit.AddOption(new Option<string>("--file", () => "score.json", "This allows you to specify where " +
+                "you output the scoring config to. Defaults to score.json"));
+            scoreInit.Handler = CommandHandler.Create<string>(this.InitScoreConfig);
 
             cmd.AddCommand(scoreInit);
 
             var secretsInit = new Command("Secrets", "Initialises a secrets.json file for your Twitter keys.");
             secretsInit.AddAlias("secrets");
-            secretsInit.AddOption(new Option<string>("--file", () => "secrets.json", "This allows you to specify where you output " +
-                "the secrets config to. Defaults to secrets.json"));
-            secretsInit.Handler = CommandHandler.Create<string>(InitSecretsConfig);
+            secretsInit.AddOption(new Option<string>("--file", () => "secrets.json", "This allows you to specify " +
+                "where you output the secrets config to. Defaults to secrets.json"));
+            secretsInit.Handler = CommandHandler.Create<string>(this.InitSecretsConfig);
 
             cmd.AddCommand(secretsInit);
-
 
             rootCommand.Add(cmd);
         }
@@ -50,18 +53,18 @@ namespace twot
         }
     }
 
-    class SecretsConfig
+    internal class SecretsConfig
     {
         [JsonProperty(PropertyName = "twot:apikey")]
-        public string APIKey { get; set; } = "";
+        public string APIKey { get; set; } = string.Empty;
 
         [JsonProperty(PropertyName = "twot:apisecret")]
-        public string APISecret { get; set; } = "";
+        public string APISecret { get; set; } = string.Empty;
 
         [JsonProperty(PropertyName = "twot:accesstoken")]
-        public string AccessToken { get; set; } = "";
+        public string AccessToken { get; set; } = string.Empty;
 
         [JsonProperty(PropertyName = "twot:accesssecret")]
-        public string AccessSecret { get; set; } = "";
+        public string AccessSecret { get; set; } = string.Empty;
     }
 }

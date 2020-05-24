@@ -1,16 +1,17 @@
 namespace twot
 {
     using System;
-    using System.Threading;
     using System.Runtime.InteropServices;
+    using System.Threading;
 
-    abstract class ProgressMeter : IDisposable
+    internal abstract class ProgressMeter : IDisposable
     {
-        protected int cursorLine;
-        readonly ConsoleColor originalColour;
-        readonly bool originalCursorVisible;
-        readonly Timer? timer;
-        internal AutoResetEvent? doneEvent;
+        private static object writeLocker = new object();
+
+        private readonly ConsoleColor originalColour;
+        private readonly bool originalCursorVisible;
+        private readonly Timer? timer;
+        private bool disposed;
 
         protected ProgressMeter(int updateSpeedMs)
         {
@@ -19,66 +20,71 @@ namespace twot
                 return;
             }
 
-            cursorLine = Console.CursorTop + 1;
-            if (cursorLine + 2 >= Console.WindowHeight)
+            this.cursorLine = Console.CursorTop + 1;
+            if (this.cursorLine + 2 >= Console.WindowHeight)
             {
                 Console.WriteLine();
-                cursorLine -= 2;
+                this.cursorLine -= 2;
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                originalCursorVisible = Console.CursorVisible;
+                this.originalCursorVisible = Console.CursorVisible;
                 Console.CursorVisible = false;
             }
 
-            originalColour = Console.ForegroundColor;
+            this.originalColour = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Green;
 
-            doneEvent = new AutoResetEvent(false);
-            timer = new Timer(UpdateUI, doneEvent, 0, updateSpeedMs);
+            this.DoneEvent = new AutoResetEvent(false);
+            this.timer = new Timer(this.UpdateUI, this.DoneEvent, 0, updateSpeedMs);
         }
 
-        internal void Write(string message, int offset = 0)
-        {
-            var target = cursorLine + offset;
-            if (target >= Console.BufferHeight)
-            {
-                target = Console.BufferHeight - 1 - Math.Min(offset - 1, 1 - offset);
-                cursorLine = target - offset;
-            }
+        protected AutoResetEvent? DoneEvent { get; private set; }
 
-            Console.CursorTop = target;
-
-            Console.CursorLeft = 0;
-            Console.Write(message);
-        }
-
-        internal abstract void UpdateUI(object? state);
-
-        private Boolean disposed;
+        protected int cursorLine { get; private set; }
 
         public void Dispose()
         {
-            if (disposed || Console.IsOutputRedirected)
+            if (this.disposed || Console.IsOutputRedirected)
             {
                 return;
             }
 
-            doneEvent?.WaitOne();
-            doneEvent?.Dispose();
-            timer?.Dispose();
+            this.DoneEvent?.WaitOne();
+            this.DoneEvent?.Dispose();
+            this.timer?.Dispose();
             Console.WriteLine();
-            Console.ForegroundColor = originalColour;
+            Console.ForegroundColor = this.originalColour;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Console.CursorVisible = originalCursorVisible;
+                Console.CursorVisible = this.originalCursorVisible;
             }
 
-            disposed = true;
+            this.disposed = true;
 
             GC.SuppressFinalize(this);
         }
+
+        internal void Write(string message, int offset = 0)
+        {
+            lock (writeLocker)
+            {
+                var target = this.cursorLine + offset;
+                if (target >= Console.BufferHeight)
+                {
+                    target = Console.BufferHeight - 1 - Math.Min(offset - 1, 1 - offset);
+                    this.cursorLine = target - offset;
+                }
+
+                Console.CursorTop = target;
+
+                Console.CursorLeft = 0;
+                Console.Write(message);
+            }
+        }
+
+        internal abstract void UpdateUI(object? state);
     }
 }

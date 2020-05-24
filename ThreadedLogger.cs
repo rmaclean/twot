@@ -2,51 +2,86 @@
 
 namespace twot
 {
-    using System.Text;
-    using System.IO;
     using System;
     using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
     using System.Threading;
 
-    class ThreadedLogger : IDisposable
+    internal class ThreadedLogger : IDisposable
     {
-        readonly Queue<Action> queue = new Queue<Action>();
-        readonly ManualResetEvent hasNewItems = new ManualResetEvent(false);
-        readonly ManualResetEvent terminate = new ManualResetEvent(false);
-        readonly ManualResetEvent waiting = new ManualResetEvent(false);
-        readonly Thread? loggingThread;
-        readonly FileStream? fileStream;
-        readonly bool enabled;
-        readonly byte[] newLine = Encoding.UTF8.GetBytes(Environment.NewLine);
+        private readonly Queue<Action> queue = new Queue<Action>();
+        private readonly ManualResetEvent hasNewItems = new ManualResetEvent(false);
+        private readonly ManualResetEvent terminate = new ManualResetEvent(false);
+        private readonly ManualResetEvent waiting = new ManualResetEvent(false);
+        private readonly Thread? loggingThread;
+        private readonly FileStream? fileStream;
+        private readonly bool enabled;
+        private readonly byte[] newLine = Encoding.UTF8.GetBytes(Environment.NewLine);
 
         public ThreadedLogger(string filename, bool enabled)
         {
             this.enabled = enabled;
-            if (enabled)
+            if (this.enabled)
             {
-                fileStream = new FileStream(filename, FileMode.Append, FileAccess.Write, FileShare.Read);
-                loggingThread = new Thread(new ThreadStart(ProcessQueue));
-                loggingThread.IsBackground = true;
-                loggingThread.Start();
+                this.fileStream = new FileStream(filename, FileMode.Append, FileAccess.Write, FileShare.Read);
+                this.loggingThread = new Thread(new ThreadStart(this.ProcessQueue));
+                this.loggingThread.IsBackground = true;
+                this.loggingThread.Start();
             }
         }
 
-        void ProcessQueue()
+        public void LogMessage(string row)
+        {
+            if (!this.enabled)
+            {
+                return;
+            }
+
+            lock (this.queue)
+            {
+                this.queue.Enqueue(() => this.WriteLogMessage(row));
+            }
+
+            this.hasNewItems.Set();
+        }
+
+        public void Flush()
+        {
+            this.waiting.WaitOne();
+        }
+
+        public void Dispose()
+        {
+            this.terminate.Set();
+            this.terminate.Dispose();
+            this.waiting.Dispose();
+            this.hasNewItems.Dispose();
+            this.loggingThread?.Join();
+            this.fileStream?.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        private void ProcessQueue()
         {
             while (true)
             {
-                waiting.Set();
-                int i = ManualResetEvent.WaitAny(new WaitHandle[] { hasNewItems, terminate });
-                // terminate was signaled
-                if (i == 1) { return; }
-                hasNewItems.Reset();
-                waiting.Reset();
+                this.waiting.Set();
+                var i = ManualResetEvent.WaitAny(new WaitHandle[] { this.hasNewItems, this.terminate });
+
+                if (i == 1)
+                {
+                    return;
+                }
+
+                this.hasNewItems.Reset();
+                this.waiting.Reset();
 
                 Queue<Action> queueCopy;
-                lock (queue)
+                lock (this.queue)
                 {
-                    queueCopy = new Queue<Action>(queue);
-                    queue.Clear();
+                    queueCopy = new Queue<Action>(this.queue);
+                    this.queue.Clear();
                 }
 
                 foreach (var log in queueCopy)
@@ -58,38 +93,11 @@ namespace twot
 
         private void WriteLogMessage(string row)
         {
-            fileStream!.Write(Encoding.UTF8.GetBytes(row));
-            if (!row.EndsWith(Environment.NewLine))
+            this.fileStream!.Write(Encoding.UTF8.GetBytes(row));
+            if (!row.EndsWith(Environment.NewLine, StringComparison.InvariantCultureIgnoreCase))
             {
-                fileStream.Write(newLine);
+                this.fileStream.Write(this.newLine);
             }
-        }
-
-        public void LogMessage(string row)
-        {
-            if (!enabled)
-            {
-                return;
-            }
-
-            lock (queue)
-            {
-                queue.Enqueue(() => WriteLogMessage(row));
-            }
-            hasNewItems.Set();
-        }
-
-        public void Flush()
-        {
-            waiting.WaitOne();
-        }
-
-        public void Dispose()
-        {
-            terminate.Set();
-            loggingThread?.Join();
-            fileStream?.Dispose();
-            GC.SuppressFinalize(this);
         }
     }
 }

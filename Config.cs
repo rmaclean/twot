@@ -1,27 +1,34 @@
 namespace twot
 {
     using System;
-    using Microsoft.Extensions.Configuration;
-    using System.Reflection;
     using System.Linq;
+    using System.Reflection;
+    using Microsoft.Extensions.Configuration;
+    using Tweetinvi;
 
-    class Config
+    using static System.ConsoleColor;
+    using static ConsoleHelper;
+
+    internal class Config
     {
+        private Config()
+        {
+            // no-op
+        }
+
         [ConfigInfo(DisplayName = "API Key", ConfigProperty = "apikey")]
-        public string APIKey { get; private set; } = "";
+        public string APIKey { get; private set; } = string.Empty;
 
         [ConfigInfo(DisplayName = "API Secret", ConfigProperty = "apisecret")]
-        public string APISecret { get; private set; } = "";
+        public string APISecret { get; private set; } = string.Empty;
 
         [ConfigInfo(DisplayName = "Access Token", ConfigProperty = "accesstoken")]
-        public string AccessToken { get; private set; } = "";
+        public string AccessToken { get; private set; } = string.Empty;
 
         [ConfigInfo(DisplayName = "Access Secret", ConfigProperty = "accesssecret")]
-        public string AccessSecret { get; private set; } = "";
+        public string AccessSecret { get; private set; } = string.Empty;
 
-        private Config() { }
-
-        public static (Boolean Success, Config Config) Load()
+        public static (bool Success, Config Config) Load()
         {
             var configuration = new ConfigurationBuilder()
                                 .AddUserSecrets(typeof(Program).Assembly)
@@ -41,13 +48,15 @@ namespace twot
                 var configValue = section.GetValue<string>(propInfo.Config!.ConfigProperty);
                 if (string.IsNullOrWhiteSpace(configValue))
                 {
-                    Console.WriteLine($"{propInfo.Config.DisplayName} not set");
+                    Writeln(Red, $"🚨 {propInfo.Config.DisplayName} not set");
                     return (false, new Config());
                 }
 
                 propInfo.PropertyInfo.SetValue(result, configValue);
             }
 
+            RateLimit.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
+            Auth.SetUserCredentials(result.APIKey, result.APISecret, result.AccessToken, result.AccessSecret);
             return (true, result);
         }
 
@@ -62,9 +71,10 @@ namespace twot
     }
 
     [System.AttributeUsage(System.AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-    sealed class ConfigInfoAttribute : System.Attribute
+    internal sealed class ConfigInfoAttribute : System.Attribute
     {
-        public string DisplayName { get; set; } = "";
-        public string ConfigProperty { get; set; } = "";
+        public string DisplayName { get; set; } = string.Empty;
+
+        public string ConfigProperty { get; set; } = string.Empty;
     }
 }

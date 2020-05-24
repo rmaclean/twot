@@ -2,26 +2,31 @@ namespace twot
 {
     using System;
 
-    class Spinner : ProgressMeter, IDisposable
+    internal class Spinner : ProgressMeter, IDisposable
     {
-        int step;
-        readonly string[] steps = new[] { "|", "/", "-", "\\" };
+        private readonly string[] steps = new[] { "|", "/", "-", "\\" };
 
-        public Spinner() : base(200) { }
+        private int step;
+
+        public Spinner()
+            : base(200)
+        {
+            // no-op
+        }
 
         internal override void UpdateUI(object? state)
         {
-            Write(steps[step]);
-            step++;
-            if (step >= steps.Length)
+            this.Write(this.steps[this.step]);
+            this.step++;
+            if (this.step >= this.steps.Length)
             {
-                step = 0;
+                this.step = 0;
             }
         }
 
-        public void Done()
+        internal void Done()
         {
-            doneEvent?.Set();
+            this.DoneEvent?.Set();
         }
     }
 }
