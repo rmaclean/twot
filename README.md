@@ -4,20 +4,20 @@
 
 Twot is a CLI tool to help with managing your Twitter experience by giving you advanced tools to manage who you follow, and who follows you.
 
-Twot works with Linux, MacOS and Windows and the latest versions for all platforms are available in the [Releases](/rmaclean/twot/releases).
-Once you have downloaded Twot, please follow the [Setting up Twot](/rmaclean/twot/wiki/Setting-up-Twot) to correctly configure it.
+Twot works with Linux, MacOS and Windows and the latest versions for all platforms are available in the [Releases](https://github.com/rmaclean/twot/releases).
+Once you have downloaded Twot, please follow the [Setting up Twot](https://github.com/rmaclean/twot/wiki/Setting-up-Twot) to correctly configure it.
 
 _Note:_ Twot is beta, so use with care. Log an [incident](https://github.com/rmaclean/twot/issues) if you find issues.
 
 ## Commands
 
 The following commands are available:
-- [Ready](/rmaclean/twot/wiki/Command:-Ready): This helps check the configuration for Twot
-- [Init](/rmaclean/twot/wiki/Command:-Init): This helps setup config files for you
-- [BlockTrain](/rmaclean/twot/wiki/Command:--BlockTrain): This blocks or mutes a Twitter user and all their followers
-- [Clean](/rmaclean/twot/wiki/Command:-Clean): This kicks people from following you based on a score; useful to remove fake followers and bots
-- [Score](/rmaclean/twot/wiki/Command:-Score): This is the same as clean but provides a report rather than taking action
-- [Unblock](/rmaclean/twot/wiki/Command:-Unblock): This unblocks or unmutes an account. A single account can be provided, or a file with multiple accounts, or it can unblocked/unmute all accounts blocked/mutedd on your account.
+- [Init](https://github.com/rmaclean/twot/wiki/Command:-Init): This helps setup config files for you
+- [Ready](https://github.com/rmaclean/twot/wiki/Command:-Ready): This helps check the configuration for Twot
+- [BlockTrain](https://github.com/rmaclean/twot/wiki/Command:--BlockTrain): This blocks or mutes a Twitter user and all their followers
+- [Clean](https://github.com/rmaclean/twot/wiki/Command:-Clean): This kicks people from following you based on a score; useful to remove fake followers and bots
+- [Score](https://github.com/rmaclean/twot/wiki/Command:-Score): This is the same as clean but provides a report rather than taking action
+- [Unblock](https://github.com/rmaclean/twot/wiki/Command:-Unblock): This unblocks or unmutes an account. A single account can be provided, or a file with multiple accounts, or it can unblocked/unmute all accounts blocked/mutedd on your account.
 
 ---
 
