@@ -33,6 +33,7 @@ deploy:
   file: Release/*
   on:
     repo: rmaclean/twot
+    tags: false
   skip_cleanup: true
   prerelease: true
 
