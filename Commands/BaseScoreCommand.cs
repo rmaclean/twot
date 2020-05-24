@@ -26,6 +26,11 @@ namespace twot
 
     internal class BaseScoreCommand
     {
+        protected BaseScoreCommand()
+        {
+            // no-op
+        }
+
         internal static async Task<List<(IUser, double)>> GetBotsOrDead(double minScore)
         {
             Writeln(DarkBlue, "Loading people, this may take some time...");
