@@ -43,7 +43,7 @@ namespace twot
             }
 
             using (var logger = new ThreadedLogger($"{file}", true))
-            using (var spinner = new Spinner())
+            using (var spinner = new Spinner("Loading your details"))
             {
                 logger.LogMessage($"# Export started {DateTime.Now.ToLongDateString()} " +
                     $"{DateTime.Now.ToLongTimeString()}");
@@ -53,10 +53,12 @@ namespace twot
                 IEnumerable<IUser> users;
                 if (mute)
                 {
+                    spinner.Message = "Loading your muted accounts";
                     users = Account.GetMutedUsers();
                 }
                 else
                 {
+                    spinner.Message = "Loading your blocked accounts";
                     users = await me.GetBlockedUsersAsync();
                 }
 

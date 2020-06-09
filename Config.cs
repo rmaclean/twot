@@ -3,9 +3,10 @@ namespace twot
     using System;
     using System.Linq;
     using System.Reflection;
+    using System.Threading;
     using Microsoft.Extensions.Configuration;
     using Tweetinvi;
-
+    using Tweetinvi.Events;
     using static System.ConsoleColor;
     using static ConsoleHelper;
 
@@ -55,7 +56,8 @@ namespace twot
                 propInfo.PropertyInfo.SetValue(result, configValue);
             }
 
-            RateLimit.RateLimitTrackerMode = RateLimitTrackerMode.TrackAndAwait;
+            RateLimit.RateLimitTrackerMode = RateLimitTrackerMode.TrackOnly;
+            TweetinviEvents.QueryBeforeExecute += RateLimitCheck;
             Auth.SetUserCredentials(result.APIKey, result.APISecret, result.AccessToken, result.AccessSecret);
             return (true, result);
         }
@@ -67,6 +69,26 @@ namespace twot
                     (PropertyInfo: propertyInfo, Config: propertyInfo.GetCustomAttribute<ConfigInfoAttribute>()))
                 .Where(property => property.Config != null)
                 .Select(property => $"{property.Config!.DisplayName} = {property.PropertyInfo.GetValue(this)}"));
+        }
+
+        private static void RateLimitCheck(object? sender, QueryBeforeExecuteEventArgs args)
+        {
+            var queryRateLimits = RateLimit.GetQueryRateLimit(args.QueryURL);
+
+            if (queryRateLimits != null)
+            {
+                if (queryRateLimits.Remaining > 0)
+                {
+                    return;
+                }
+
+                using (var spinner = new Spinner("You have been rate limited by Twitter until " +
+                    $"{queryRateLimits.ResetDateTime.ToLongTimeString()}. Please wait or Ctrl+C to quit"))
+                {
+                    Thread.Sleep((int)queryRateLimits.ResetDateTimeInMilliseconds);
+                    spinner.Done();
+                }
+            }
         }
     }
 

@@ -85,7 +85,7 @@ namespace twot
 
             if (all)
             {
-                using (var spinner = new Spinner())
+                using (var spinner = new Spinner("Loading accounts"))
                 {
                     if (unmute)
                     {

@@ -8,9 +8,6 @@ namespace twot
     using Tweetinvi;
     using Tweetinvi.Models;
 
-    using static System.ConsoleColor;
-    using static ConsoleHelper;
-
     internal class ScoreSettings
     {
         public string mode { get; set; } = string.Empty;
@@ -33,16 +30,17 @@ namespace twot
 
         internal static async Task<List<(IUser, double)>> GetBotsOrDead(double minScore)
         {
-            Writeln(DarkBlue, "Loading people, this may take some time...");
-            using (var spinner = new Spinner())
+            using (var spinner = new Spinner("Loading your details"))
             {
                 var me = User.GetAuthenticatedUser();
-
+                spinner.Message = "Loading your friends";
                 var friends = await me.GetFriendIdsAsync(int.MaxValue);
+                spinner.Message = "Loading your followers";
                 var followers = await me.GetFollowersAsync(int.MaxValue);
 
                 var scoringConfig = new ScoreConfig();
 
+                spinner.Message = "Determining scores";
                 var result = followers
                     .Where(_ => !friends.Contains(_.Id))
                     .Select(follower => (Follower: follower, Score: Score(follower, scoringConfig)))

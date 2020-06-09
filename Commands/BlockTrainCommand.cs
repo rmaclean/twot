@@ -49,15 +49,19 @@ namespace twot
 
         private static async Task<List<IUser>> GetTargets(string targetUsername)
         {
-            using (var spinner = new Spinner())
+            using (var spinner = new Spinner("Loading your details"))
             {
                 var result = new List<IUser>();
                 var me = User.GetAuthenticatedUser();
+
+                spinner.Message = "Loading your friends";
                 var friends = await me.GetFriendsAsync(int.MaxValue);
 
+                spinner.Message = "Loading your target";
                 var target = User.GetUserFromScreenName(targetUsername);
                 result.Add(target);
 
+                spinner.Message = "Loading your targets followers";
                 var enermies = await target.GetFollowersAsync(int.MaxValue);
 
                 var targetsForBlock = enermies.Where(enermy => !friends.Contains(enermy));
