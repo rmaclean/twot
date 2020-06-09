@@ -1,8 +1,6 @@
 namespace twot
 {
     using System;
-    using static System.ConsoleColor;
-    using static ConsoleHelper;
 
     internal class Spinner : ProgressMeter, IDisposable
     {
@@ -29,7 +27,7 @@ namespace twot
 
         private bool messageUpdated = false;
 
-        private string message = "";
+        private string message = string.Empty;
 
         private Random random = new Random();
 
