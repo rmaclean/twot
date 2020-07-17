@@ -67,20 +67,20 @@ namespace twot
             GC.SuppressFinalize(this);
         }
 
-        internal void Write(string message, int offset = 0)
+        internal void Write(string message, int verticalOffset = 0, int horizontalOffset = 0)
         {
             lock (writeLocker)
             {
-                var target = this.cursorLine + offset;
+                var target = this.cursorLine + verticalOffset;
                 if (target >= Console.BufferHeight)
                 {
-                    target = Console.BufferHeight - 1 - Math.Min(offset - 1, 1 - offset);
-                    this.cursorLine = target - offset;
+                    target = Console.BufferHeight - 1 - Math.Min(verticalOffset - 1, 1 - verticalOffset);
+                    this.cursorLine = target - verticalOffset;
                 }
 
                 Console.CursorTop = target;
 
-                Console.CursorLeft = 0;
+                Console.CursorLeft = horizontalOffset;
                 Console.Write(message);
             }
         }
